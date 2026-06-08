@@ -1,5 +1,5 @@
 """
-Iconify v2.1.0 - Icons API
+Iconify v2.4.0 - Icons API
 Inkl. Code-Generierung für SVG, IMG, Font
 """
 from fastapi import APIRouter, HTTPException, Query
@@ -147,11 +147,22 @@ async def get_icon_code(
     content: "\\e000"; /* Codepoint variiert */
 }}'''
     
+    # Lizenz/Attribution mitliefern (bei attributionspflichtigen Sets verpflichtend)
+    attribution = ""
+    if config.requires_attribution:
+        attribution = (f'Icon "{icon_name}" aus {config.name} '
+                       f'({config.license_spdx}) – {config.license_url}')
+
     return {
         "svg": svg_colored,
         "img": f'<img src="{icon_path}" width="{size}" height="{size}" alt="{icon_name}">',
         "font_html": font_html,
         "font_css": font_css,
         "font_url": config.font_url,
-        "has_font": bool(config.font_url)
+        "has_font": bool(config.font_url),
+        "license": config.license,
+        "license_spdx": config.license_spdx,
+        "license_url": config.license_url,
+        "requires_attribution": config.requires_attribution,
+        "attribution": attribution,
     }

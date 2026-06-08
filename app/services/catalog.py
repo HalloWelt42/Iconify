@@ -1,5 +1,5 @@
 """
-Iconify v2.3.0 - Catalog Service
+Iconify v2.4.0 - Catalog Service
 Verwaltet heruntergeladene Icon-Sets inkl. Custom Sets
 """
 import json
@@ -24,20 +24,27 @@ def load_custom_sets() -> dict:
     return {}
 
 
-def get_available_sets() -> list[dict]:
-    """Listet alle verfügbaren Sets mit Download-Status"""
+def get_available_sets(license_category: str = "") -> list[dict]:
+    """Listet alle verfügbaren Sets mit Download-Status.
+
+    license_category: optionaler Filter ('permissive' | 'attribution').
+    """
     sets = []
-    
+
     # Standard Icon-Sets
     for config in ICON_SETS.values():
         set_path = ICONS_PATH / config.id
         downloaded = set_path.exists() and any(set_path.iterdir()) if set_path.exists() else False
-        
+
         info = {
             "id": config.id,
             "name": config.name,
             "estimated_count": config.icon_count,
             "license": config.license,
+            "license_spdx": config.license_spdx,
+            "license_url": config.license_url,
+            "license_category": config.license_category,
+            "requires_attribution": config.requires_attribution,
             "website": config.website,
             "styles": config.styles,
             "downloaded": downloaded,
@@ -70,6 +77,10 @@ def get_available_sets() -> list[dict]:
             "name": config.get("name", set_id),
             "estimated_count": icon_count,
             "license": config.get("license", "Custom"),
+            "license_spdx": config.get("license_spdx", config.get("license", "")),
+            "license_url": config.get("license_url", ""),
+            "license_category": config.get("license_category", "permissive"),
+            "requires_attribution": config.get("requires_attribution", False),
             "website": config.get("website", ""),
             "styles": ["default"],
             "downloaded": True,  # Custom Sets sind immer "downloaded"
@@ -78,7 +89,11 @@ def get_available_sets() -> list[dict]:
             "is_custom": True,
             "prefix": config.get("prefix", set_id)
         })
-    
+
+    # Optionaler Lizenz-Filter
+    if license_category:
+        sets = [s for s in sets if s.get("license_category") == license_category]
+
     # Heruntergeladene zuerst, dann alphabetisch
     return sorted(sets, key=lambda x: (not x["downloaded"], x["name"]))
 
@@ -95,6 +110,10 @@ def get_set_info(set_id: str) -> Optional[dict]:
             "id": config.id,
             "name": config.name,
             "license": config.license,
+            "license_spdx": config.license_spdx,
+            "license_url": config.license_url,
+            "license_category": config.license_category,
+            "requires_attribution": config.requires_attribution,
             "website": config.website,
             "styles": config.styles,
             "downloaded": set_path.exists(),

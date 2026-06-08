@@ -1,5 +1,5 @@
 """
-Iconify v2.3.0 - Self-hosted Icon Font Manager
+Iconify v2.4.0 - Self-hosted Icon Font Manager
 Mit Custom Font Generator und eigenen Icon-Sets
 """
 from fastapi import FastAPI

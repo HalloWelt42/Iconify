@@ -1,5 +1,5 @@
 """
-Iconify v2.2.0 - Font Generator Service
+Iconify v2.4.0 - Font Generator Service
 Generiert Icon-Fonts mit Original-Klassennamen der Sets
 """
 
@@ -147,19 +147,28 @@ def generate_font(icons: list[dict], font_name: str = "my-icons") -> Path:
             set_id = info["set"]
             if set_id not in sets_used:
                 if set_id in ICON_SETS:
+                    cfg = ICON_SETS[set_id]
                     sets_used[set_id] = {
-                        "name": ICON_SETS[set_id].name,
-                        "license": ICON_SETS[set_id].license,
-                        "website": ICON_SETS[set_id].website,
+                        "name": cfg.name,
+                        "license": cfg.license,
+                        "license_spdx": cfg.license_spdx,
+                        "license_url": cfg.license_url,
+                        "requires_attribution": cfg.requires_attribution,
+                        "website": cfg.website,
                         "count": 0
                     }
                 else:
-                    sets_used[set_id] = {"name": set_id, "license": "Unknown", "website": "", "count": 0}
+                    sets_used[set_id] = {
+                        "name": set_id, "license": "Custom", "license_spdx": "",
+                        "license_url": "", "requires_attribution": False,
+                        "website": "", "count": 0
+                    }
             sets_used[set_id]["count"] += 1
-        
-        # 4. README erstellen
+
+        # 4. README + ATTRIBUTION.txt erstellen
         readme = generate_readme(font_name, prefix, icon_map, sets_used, is_single_set)
         (output_dir / "README.md").write_text(readme)
+        (output_dir / "ATTRIBUTION.txt").write_text(generate_attribution(sets_used))
         
         # 5. Icon-Map als JSON speichern
         (output_dir / "icons.json").write_text(json.dumps(icon_map, indent=2))
@@ -303,6 +312,39 @@ Custom Icon Font - Generiert mit Iconify am {date}
 ---
 Generiert mit Iconify
 """
+
+
+def generate_attribution(sets_used: dict) -> str:
+    """Erzeugt eine ATTRIBUTION.txt (NOTICE) mit Lizenz-/Quellenhinweisen je Set."""
+    lines = [
+        "ATTRIBUTION / LIZENZHINWEISE",
+        "=" * 40,
+        "",
+        "Dieser Icon-Font wurde mit Iconify aus den folgenden Icon-Sets erzeugt.",
+        "Die Icons unterliegen den jeweiligen Set-Lizenzen:",
+        "",
+    ]
+    needs_attr = False
+    for info in sets_used.values():
+        spdx = info.get("license_spdx") or ""
+        lines.append(f"- {info['name']} ({info['count']} Icons)")
+        lines.append(f"    Lizenz: {info.get('license', '')}" + (f" [{spdx}]" if spdx else ""))
+        if info.get("license_url"):
+            lines.append(f"    Lizenztext: {info['license_url']}")
+        if info.get("website"):
+            lines.append(f"    Quelle: {info['website']}")
+        if info.get("requires_attribution"):
+            needs_attr = True
+            lines.append("    HINWEIS: Dieses Set verlangt eine Namensnennung (Attribution).")
+        lines.append("")
+    if needs_attr:
+        lines += [
+            "-" * 40,
+            "Mindestens ein verwendetes Set ist attributionspflichtig (z. B. CC BY 4.0).",
+            "Bitte diese Datei bei der Weitergabe beibehalten und die Urheber nennen.",
+            "",
+        ]
+    return "\n".join(lines)
 
 
 def cleanup_old_fonts(max_age_hours: int = 24):

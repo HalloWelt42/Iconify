@@ -1,5 +1,5 @@
 """
-Iconify v2.3.0 - Custom Icon Sets API
+Iconify v2.4.0 - Custom Icon Sets API
 Eigene Icon-Sets anlegen, verwalten und Icons hochladen
 """
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form

@@ -1,5 +1,5 @@
 """
-Iconify v2.1.0 - Sets API
+Iconify v2.4.0 - Sets API
 """
 from fastapi import APIRouter, HTTPException
 import asyncio
@@ -11,9 +11,12 @@ router = APIRouter()
 
 
 @router.get("")
-async def list_sets():
-    """Listet alle verfügbaren Icon-Sets"""
-    return catalog.get_available_sets()
+async def list_sets(license_category: str = ""):
+    """Listet alle verfügbaren Icon-Sets.
+
+    Optionaler Filter `license_category` ('permissive' | 'attribution').
+    """
+    return catalog.get_available_sets(license_category=license_category)
 
 
 @router.get("/{set_id}")

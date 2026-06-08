@@ -15,7 +15,7 @@
             <div class="sidebar-header">
                 <div class="logo">◆</div>
                 <h1>Iconify</h1>
-                <span class="version">v2.3.1</span>
+                <span class="version" id="app-version">v2.4.0</span>
             </div>
             <div class="sidebar-content">
                 <div class="sidebar-section-title">
@@ -24,6 +24,11 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                     </button>
                 </div>
+                <select id="license-filter" class="license-filter" title="Nach Lizenz filtern">
+                    <option value="">Alle Lizenzen</option>
+                    <option value="permissive">Frei nutzbar</option>
+                    <option value="attribution">Namensnennung nötig</option>
+                </select>
                 <div id="set-list"></div>
             </div>
             <div class="sidebar-footer">
@@ -85,6 +90,7 @@
             </div>
             <div class="panel-content">
                 <div class="preview-container" id="preview"></div>
+                <div class="panel-license hidden" id="panel-license"></div>
 
                 <div class="control-group">
                     <div class="control-label">
@@ -127,6 +133,7 @@
                         <button class="copy-btn" id="copy-code">Kopieren</button>
                         <pre><code id="code-content"></code></pre>
                     </div>
+                    <div class="code-attribution hidden" id="code-attribution"></div>
                 </div>
             </div>
             <div class="panel-actions">
@@ -284,7 +291,8 @@
             downloadInterval: null,
             observer: null,
             iconColor: '#000000',
-            bgColor: 'transparent',
+            bgColor: '#ffffff',
+            licenseFilter: '',  // '' | 'permissive' | 'attribution'
             collection: [],  // Ausgewählte Icons für Font
             settings: {
                 showNames: true,
@@ -342,7 +350,10 @@
             fontName: $('font-name'),
             btnCollection: $('btn-collection'),
             btnGenerate: $('collection-generate'),
-            btnAddAll: $('btn-add-all')
+            btnAddAll: $('btn-add-all'),
+            licenseFilter: $('license-filter'),
+            panelLicense: $('panel-license'),
+            codeAttribution: $('code-attribution')
         };
 
         // ========== MATERIAL DESIGN PALETTE ==========
@@ -602,9 +613,21 @@
         }
 
         // ========== RENDER ==========
+        function licenseBadge(s) {
+            const cat = s.license_category || 'permissive';
+            const label = s.license_spdx || s.license || '';
+            if (!label) return '';
+            const cls = cat === 'attribution' ? 'license-attribution' : 'license-permissive';
+            const title = (s.requires_attribution ? 'Namensnennung nötig — ' : '') + (s.license || label);
+            return `<span class="license-badge ${cls}" title="${title}">${label}</span>`;
+        }
+
         function renderSets() {
-            const downloaded = state.sets.filter(s => s.downloaded);
-            const available = state.sets.filter(s => !s.downloaded);
+            const list = state.licenseFilter
+                ? state.sets.filter(s => (s.license_category || 'permissive') === state.licenseFilter)
+                : state.sets;
+            const downloaded = list.filter(s => s.downloaded);
+            const available = list.filter(s => !s.downloaded);
 
             let html = '';
             
@@ -617,9 +640,9 @@
                         <div class="set-item ${active}" data-id="${s.id}" data-custom="${isCustom || false}">
                             <div class="set-info">
                                 <div class="set-name">${s.name}${isCustom ? ' <span class="custom-badge">Custom</span>' : ''}</div>
-                                <div class="set-count">${count} Icons</div>
+                                <div class="set-meta"><span class="set-count">${count} Icons</span>${licenseBadge(s)}</div>
                             </div>
-                            ${isCustom ? `<button class="btn-delete-set" data-delete="${s.id}" title="Set löschen">×</button>` : '<span class="set-badge">✓</span>'}
+                            ${isCustom ? `<button class="btn-delete-set" data-delete="${s.id}" title="Set löschen">×</button>` : `<button class="btn-reimport" data-reimport="${s.id}" title="Set neu importieren / aktualisieren">↻</button>`}
                         </div>`;
                 });
             }
@@ -631,7 +654,7 @@
                         <div class="set-item" data-id="${s.id}">
                             <div class="set-info">
                                 <div class="set-name">${s.name}</div>
-                                <div class="set-count">~${s.estimated_count} Icons</div>
+                                <div class="set-meta"><span class="set-count">~${s.estimated_count} Icons</span>${licenseBadge(s)}</div>
                             </div>
                             <button class="btn-download" data-dl="${s.id}" title="Herunterladen">↓</button>
                         </div>`;
@@ -655,6 +678,19 @@
                         return;
                     }
                     
+                    // Re-Import (heruntergeladenes Standard-Set neu/aktualisiert laden)
+                    const reBtn = e.target.closest('[data-reimport]');
+                    if (reBtn) {
+                        e.stopPropagation();
+                        const setId = reBtn.dataset.reimport;
+                        const set = state.sets.find(s => s.id === setId);
+                        if (await showConfirm('Neu importieren', `"${set?.name || setId}" neu herunterladen? Vorhandene Dateien werden ersetzt.`)) {
+                            await fetch(`/api/sets/${setId}`, { method: 'DELETE' });
+                            downloadSet(setId);
+                        }
+                        return;
+                    }
+
                     const dlBtn = e.target.closest('[data-dl]');
                     if (dlBtn) {
                         e.stopPropagation();
@@ -812,7 +848,22 @@
             
             el.panel.classList.remove('hidden');
             el.panelTitle.textContent = icon.name;
-            
+
+            // Lizenz des aktiven Sets anzeigen
+            const set = state.activeSet || {};
+            if (el.panelLicense) {
+                const lic = set.license || set.license_spdx || '';
+                if (lic) {
+                    const link = set.license_url
+                        ? `<a href="${set.license_url}" target="_blank" rel="noopener">${lic}</a>` : lic;
+                    const attr = set.requires_attribution ? ' · Namensnennung nötig' : '';
+                    el.panelLicense.innerHTML = `Lizenz: ${link}${attr}`;
+                    el.panelLicense.classList.remove('hidden');
+                } else {
+                    el.panelLicense.classList.add('hidden');
+                }
+            }
+
             updatePreview();
             updateCode('svg');
         }
@@ -887,6 +938,15 @@
                 });
                 const res = await fetch(`/api/icons/${state.activeSet.id}/${icon.name}/code?${params}`);
                 const data = await res.json();
+
+                if (el.codeAttribution) {
+                    if (data.requires_attribution && data.attribution) {
+                        el.codeAttribution.textContent = '⚠ ' + data.attribution;
+                        el.codeAttribution.classList.remove('hidden');
+                    } else {
+                        el.codeAttribution.classList.add('hidden');
+                    }
+                }
 
                 switch (tab) {
                     case 'svg':
@@ -1439,6 +1499,14 @@
                     fetchIcons();
                 }, 300);
             });
+
+            // Lizenz-Filter (Sidebar)
+            if (el.licenseFilter) {
+                el.licenseFilter.addEventListener('change', () => {
+                    state.licenseFilter = el.licenseFilter.value;
+                    renderSets();
+                });
+            }
             
             // Keyboard
             document.addEventListener('keydown', e => {
@@ -1477,7 +1545,15 @@
             el.colorPreview.style.background = state.iconColor;
             el.colorValue.textContent = state.iconColor;
             el.bgValue.textContent = state.bgColor;
-            
+            el.bgPreview.style.background = state.bgColor === 'transparent' ? '' : state.bgColor;
+            el.bgPreview.classList.toggle('transparent-bg', state.bgColor === 'transparent');
+
+            // App-Version aus /health (Single Source of Truth)
+            fetch('/health').then(r => r.json()).then(d => {
+                const v = document.getElementById('app-version');
+                if (v && d.version) v.textContent = 'v' + d.version;
+            }).catch(() => {});
+
             // Collection Badge aktualisieren
             updateCollectionUI();
             

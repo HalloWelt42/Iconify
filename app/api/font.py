@@ -1,5 +1,5 @@
 """
-Iconify v2.1.0 - Font Generator API
+Iconify v2.4.0 - Font Generator API
 Endpoint für Custom Icon Font Generierung
 """
 from fastapi import APIRouter, HTTPException, BackgroundTasks
