@@ -22,6 +22,11 @@ __pycache__/
 .venv/
 venv/
 
+# Frontend (Svelte/Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/.svelte-kit/
+
 # Betriebssystem / Editor
 .DS_Store
 *.swp
