@@ -7,7 +7,7 @@ from typing import Optional
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
-__version__ = "3.0.0-r0"
+__version__ = "2.4.0"
 
 ICONS_PATH = Path("/app/icons")
 
