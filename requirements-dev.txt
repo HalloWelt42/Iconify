@@ -1,0 +1,5 @@
+# Test-/Entwicklungs-Abhängigkeiten (NICHT im Container/Image installiert)
+-r requirements.txt
+pytest==8.3.3
+pytest-asyncio==0.24.0
+aioresponses==0.7.6
