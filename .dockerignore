@@ -1,0 +1,17 @@
+# Nicht in den Build-Context (schlankes Image, schneller Build)
+.git
+.githooks
+icons
+/data
+app/temp
+*.db
+*.zip
+__pycache__
+*.py[cod]
+.pytest_cache
+.venv
+venv
+tests
+.env
+.DS_Store
+*.md

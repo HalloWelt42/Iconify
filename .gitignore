@@ -1,0 +1,27 @@
+# Icon-Daten (werden zur Laufzeit per Import geladen, nicht versioniert)
+icons/*
+!icons/.gitkeep
+
+# Laufzeit-Daten & Index (jederzeit neu baubar)
+/data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Generierte Fonts / Exporte
+app/temp/
+*.zip
+
+# Konfiguration mit lokalen Werten
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Betriebssystem / Editor
+.DS_Store
+*.swp

@@ -1,0 +1,9 @@
+services:
+  iconify:
+    build: .
+    container_name: iconify
+    ports:
+      - "8766:8766"
+    volumes:
+      - ./icons:/app/icons
+    restart: unless-stopped
