@@ -22,8 +22,15 @@ app.include_router(icons.router, prefix="/api/icons", tags=["icons"])
 app.include_router(font.router, prefix="/api/font", tags=["font"])
 app.include_router(custom.router, prefix="/api/custom", tags=["custom"])
 
-# Static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Gebautes Svelte-Frontend (dist) liegt im Image unter /app/web.
+# Fallback auf das Legacy-app/static, falls (noch) kein Build vorhanden ist.
+WEB_DIR = Path("/app/web")
+LEGACY_INDEX = Path("app/static/index.html")
+
+if (WEB_DIR / "assets").exists():
+    app.mount("/assets", StaticFiles(directory=str(WEB_DIR / "assets")), name="assets")
+if Path("app/static").exists():
+    app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.mount("/icons", StaticFiles(directory=str(ICONS_PATH)), name="icons")
 
 # Temp directory für Font-Downloads
@@ -31,9 +38,14 @@ TEMP_PATH = Path("/app/temp")
 TEMP_PATH.mkdir(parents=True, exist_ok=True)
 
 
+def _index_file() -> str:
+    web_index = WEB_DIR / "index.html"
+    return str(web_index) if web_index.exists() else str(LEGACY_INDEX)
+
+
 @app.get("/")
 async def root():
-    return FileResponse("app/static/index.html")
+    return FileResponse(_index_file())
 
 
 @app.get("/favicon.ico")

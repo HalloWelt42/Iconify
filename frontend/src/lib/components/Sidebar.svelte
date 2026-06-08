@@ -54,9 +54,23 @@
     if (ui.activeSetId === id) ui.activeSetId = null
     await loadSets()
   }
+
+  async function createSet() {
+    const name = prompt('Name des eigenen Sets:')?.trim()
+    if (!name || name.length < 2) return
+    const r = await api.createCustomSet(name)
+    if (r.success) {
+      await loadSets()
+      selectSet(r.set_id)
+      toast('Eigenes Set erstellt', 'success')
+    } else {
+      toast(r.error || 'Konnte Set nicht erstellen', 'error')
+    }
+  }
 </script>
 
 <div class="sidebar">
+  <button class="btn btn-secondary block" style="margin-bottom:10px" onclick={createSet}>+ Eigenes Set</button>
   <select class="license-filter" bind:value={ui.licenseFilter}>
     <option value="">Alle Lizenzen</option>
     <option value="permissive">Frei nutzbar</option>

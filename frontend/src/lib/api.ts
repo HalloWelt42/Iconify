@@ -45,4 +45,30 @@ export const api = {
   downloadSet: (id: string) => fetch(`/api/sets/${encodeURIComponent(id)}/download`, { method: 'POST' }),
   progress: (id: string) => j<Progress>(`/api/sets/${encodeURIComponent(id)}/progress`),
   deleteSet: (id: string) => fetch(`/api/sets/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
+  generateFont: (icons: { set_id: string; name: string; style: string }[], fontName: string) =>
+    j<{ success: boolean; download_url: string; icon_count: number; error: string }>('/api/font/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ icons, font_name: fontName }),
+    }),
+
+  createCustomSet: (name: string, prefix = '') =>
+    j<{ success: boolean; set_id: string; error: string }>('/api/custom/sets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, prefix }),
+    }),
+
+  uploadIcons: (setId: string, files: File[]) => {
+    const fd = new FormData()
+    files.forEach((f) => fd.append('files', f))
+    return j<{ success: boolean; uploaded: string[]; errors: string[]; count: number }>(
+      `/api/custom/sets/${encodeURIComponent(setId)}/icons`,
+      { method: 'POST', body: fd },
+    )
+  },
+
+  deleteCustomIcon: (setId: string, name: string) =>
+    fetch(`/api/custom/sets/${encodeURIComponent(setId)}/icons/${encodeURIComponent(name)}`, { method: 'DELETE' }),
 }

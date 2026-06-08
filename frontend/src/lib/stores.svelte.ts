@@ -16,6 +16,14 @@ function loadSettings(): Settings {
   }
 }
 
+function loadCart(): Icon[] {
+  try {
+    return JSON.parse(localStorage.getItem('iconify-cart') || '[]')
+  } catch {
+    return []
+  }
+}
+
 interface Toast { id: number; msg: string; type: string }
 
 export const ui = $state({
@@ -31,6 +39,7 @@ export const ui = $state({
   loading: false,
   styles: [] as string[],
   selected: null as Icon | null,
+  cart: loadCart(),
   toasts: [] as Toast[],
   settings: loadSettings(),
 })
@@ -46,6 +55,21 @@ export function toast(msg: string, type = 'info') {
 
 export function saveSettings() {
   localStorage.setItem('iconify-settings', JSON.stringify(ui.settings))
+}
+
+export function saveCart() {
+  localStorage.setItem('iconify-cart', JSON.stringify(ui.cart))
+}
+export function inCart(icon: Icon): boolean {
+  return ui.cart.some((c) => c.path === icon.path)
+}
+export function toggleCart(icon: Icon) {
+  ui.cart = inCart(icon) ? ui.cart.filter((c) => c.path !== icon.path) : [...ui.cart, icon]
+  saveCart()
+}
+export function clearCart() {
+  ui.cart = []
+  saveCart()
 }
 
 export function activeSet(): IconSet | undefined {

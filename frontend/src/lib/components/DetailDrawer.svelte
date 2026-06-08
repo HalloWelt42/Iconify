@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ui, toast } from '../stores.svelte'
+  import { ui, toast, toggleCart, inCart } from '../stores.svelte'
   import { api } from '../api'
   import type { IconCode } from '../types'
 
@@ -12,6 +12,7 @@
   let code = $state<IconCode | null>(null)
 
   const icon = $derived(ui.selected!)
+  const carted = $derived(inCart(icon))
 
   async function load() {
     if (!ui.selected) return
@@ -116,8 +117,11 @@
       </div>
     </div>
     <div class="drawer-actions">
-      <button class="btn btn-primary block" onclick={download}>SVG herunterladen</button>
-      <button class="btn btn-secondary block" onclick={copy}>Code kopieren</button>
+      <button class="btn btn-primary block" onclick={() => toggleCart(icon)}>
+        {carted ? '✓ im Arbeits-Set' : '+ Arbeits-Set'}
+      </button>
+      <button class="btn btn-secondary" onclick={download} title="SVG herunterladen">SVG</button>
+      <button class="btn btn-secondary" onclick={copy} title="Code kopieren">Code</button>
     </div>
   </div>
 </div>

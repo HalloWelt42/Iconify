@@ -66,31 +66,41 @@ class IconDownloader:
         return aiohttp.ClientSession(connector=connector, timeout=timeout)
 
     async def _download_single(self, session: aiohttp.ClientSession, url: str,
-                               path: Path, progress: DownloadProgress) -> dict:
+                               path: Path, progress: DownloadProgress,
+                               max_attempts: int = 4) -> dict:
+        # Resume: bereits vorhandene Datei nicht erneut laden -> idempotent &
+        # wiederaufnehmbar (ein erneuter Import setzt dort fort, wo er aufhörte).
+        if path.exists():
+            progress.completed += 1
+            return {"status": "skipped"}
+
         async with self.semaphore:
-            try:
-                progress.current_icon = path.stem
-                async with session.get(url) as response:
-                    if response.status == 200:
-                        content = await response.read()
-                        path.parent.mkdir(parents=True, exist_ok=True)
-                        path.write_bytes(content)
-                        progress.completed += 1
-                        return {"status": "success"}
-                    elif response.status == 429:
-                        retry = int(response.headers.get("Retry-After", 30))
-                        logger.warning(f"Rate-Limited, warte {retry}s")
-                        await asyncio.sleep(retry)
-                        return await self._download_single(session, url, path, progress)
-                    else:
+            progress.current_icon = path.stem
+            # Beschränkte Retry-Schleife (KEINE Rekursion -> kein Semaphor-Deadlock).
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    async with session.get(url) as response:
+                        if response.status == 200:
+                            content = await response.read()
+                            path.parent.mkdir(parents=True, exist_ok=True)
+                            path.write_bytes(content)
+                            progress.completed += 1
+                            return {"status": "success"}
+                        if response.status == 429:
+                            # Rate-Limit: gedeckelt warten (max ~15s), dann erneut.
+                            retry = min(int(response.headers.get("Retry-After", 5)), 15)
+                            await asyncio.sleep(retry + attempt)
+                            continue
+                        if response.status in (500, 502, 503, 504):
+                            await asyncio.sleep(attempt)
+                            continue
                         progress.failed += 1
                         return {"status": "error", "code": response.status}
-            except asyncio.TimeoutError:
-                progress.failed += 1
-                return {"status": "timeout"}
-            except Exception as e:
-                progress.failed += 1
-                return {"status": "error", "error": str(e)}
+                except (asyncio.TimeoutError, aiohttp.ClientError):
+                    await asyncio.sleep(attempt)  # kurzer Backoff, dann erneut
+                    continue
+            progress.failed += 1
+            return {"status": "error", "error": "max_attempts"}
 
     async def download_icon_set(self, set_id: str) -> dict:
         if set_id not in ICON_SETS:

@@ -15,3 +15,5 @@ tests
 .env
 .DS_Store
 *.md
+frontend/node_modules
+frontend/dist

@@ -1,8 +1,16 @@
-FROM python:3.12-slim
+# ---- Stage 1: Svelte-Frontend bauen ----
+FROM node:20-slim AS frontend
+WORKDIR /build
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm ci || npm install
+COPY frontend/ ./
+RUN npm run build   # -> /build/dist
 
+# ---- Stage 2: Python-Runtime (inkl. Node für fantasticon) ----
+FROM python:3.12-slim
 WORKDIR /app
 
-# System-Dependencies + Node.js für fantasticon
+# System-Dependencies + Node.js für fantasticon (Font-Generierung)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     nodejs \
@@ -16,11 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
 
-# Highlight.js lokal herunterladen (Atom One Dark Theme)
-RUN curl -sL "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" -o /app/app/static/js/highlight.min.js && \
-    curl -sL "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js" -o /app/app/static/js/hljs-xml.min.js && \
-    curl -sL "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js" -o /app/app/static/js/hljs-css.min.js && \
-    curl -sL "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" -o /app/app/static/css/hljs.css
+# Gebautes Frontend aus Stage 1 übernehmen
+COPY --from=frontend /build/dist ./web
 
 RUN mkdir -p /app/icons /app/temp
 
