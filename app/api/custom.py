@@ -12,6 +12,7 @@ import shutil
 import logging
 
 from app.config import ICONS_PATH
+from app.services import search_index
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,12 @@ def sanitize_id(name: str) -> str:
 class CreateSetRequest(BaseModel):
     name: str
     prefix: str = ""
+
+
+class CopyRequest(BaseModel):
+    src_set: str
+    name: str
+    style: str = ""
 
 
 class CreateSetResponse(BaseModel):
@@ -170,12 +177,43 @@ async def upload_icons(set_id: str, files: list[UploadFile] = File(...)):
         except Exception as e:
             errors.append(f"{file.filename}: {str(e)}")
     
+    if uploaded:
+        search_index.refresh_set(set_id)
     return {
         "success": len(uploaded) > 0,
         "uploaded": uploaded,
         "errors": errors,
         "count": len(uploaded)
     }
+
+
+@router.post("/sets/{set_id}/icons/from")
+async def copy_icon_from(set_id: str, req: CopyRequest):
+    """Kopiert ein vorhandenes Icon aus einem Quell-Set ins Custom-Set (mit Herkunft)."""
+    sets = load_custom_sets()
+    if set_id not in sets:
+        raise HTTPException(status_code=404, detail="Custom Set nicht gefunden")
+
+    base = ICONS_PATH / req.src_set
+    if req.style:
+        src = base.joinpath(*req.style.split("/"), f"{req.name}.svg")
+    else:
+        src = base / f"{req.name}.svg"
+    if not src.exists():
+        hits = list(base.glob(f"**/{req.name}.svg")) if base.exists() else []
+        src = hits[0] if hits else None
+    if not src or not src.exists():
+        raise HTTPException(status_code=404, detail="Quell-Icon nicht gefunden")
+
+    dest_dir = ICONS_PATH / set_id
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    safe = sanitize_id(req.name)
+    (dest_dir / f"{safe}.svg").write_bytes(src.read_bytes())
+
+    sets[set_id].setdefault("provenance", {})[safe] = req.src_set
+    save_custom_sets(sets)
+    search_index.refresh_set(set_id)
+    return {"success": True, "name": safe, "origin": req.src_set}
 
 
 @router.delete("/sets/{set_id}/icons/{icon_name}")
@@ -193,8 +231,9 @@ async def delete_icon(set_id: str, icon_name: str):
         raise HTTPException(status_code=404, detail="Icon nicht gefunden")
     
     icon_path.unlink()
+    search_index.refresh_set(set_id)
     logger.info(f"Icon gelöscht: {set_id}/{icon_name}")
-    
+
     return {"success": True, "message": f"Icon '{icon_name}' gelöscht"}
 
 
@@ -208,12 +247,15 @@ async def list_custom_icons(set_id: str):
     
     set_path = ICONS_PATH / set_id
     icons = []
-    
+    prov = sets[set_id].get("provenance", {}) if set_id in sets else {}
+
     if set_path.exists():
         for svg_file in sorted(set_path.glob("*.svg")):
             icons.append({
                 "name": svg_file.stem,
-                "path": f"/icons/{set_id}/{svg_file.stem}"
+                "path": f"/icons/{set_id}/{svg_file.stem}",
+                "set_id": set_id,
+                "origin": prov.get(svg_file.stem, "eigen"),
             })
     
     return {

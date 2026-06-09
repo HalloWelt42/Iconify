@@ -79,7 +79,7 @@ def get_available_sets(license_category: str = "") -> list[dict]:
             "license": config.get("license", "Custom"),
             "license_spdx": config.get("license_spdx", config.get("license", "")),
             "license_url": config.get("license_url", ""),
-            "license_category": config.get("license_category", "permissive"),
+            "license_category": config.get("license_category", "none"),
             "requires_attribution": config.get("requires_attribution", False),
             "website": config.get("website", ""),
             "styles": ["default"],

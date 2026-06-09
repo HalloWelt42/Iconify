@@ -7,7 +7,7 @@ from fastapi.responses import Response
 from pathlib import Path
 import re
 
-from app.services import catalog
+from app.services import catalog, search_index, llm
 from app.config import ICONS_PATH, ICON_SETS
 
 router = APIRouter()
@@ -15,23 +15,51 @@ router = APIRouter()
 
 @router.get("/search")
 async def search_icons(
-    set_id: str = Query(...),
+    set_id: str = Query(""),
     q: str = Query(""),
     style: str = Query(""),
+    scope: str = Query("set"),       # set | all | custom
+    license: str = Query(""),        # '' | permissive | attribution | with | without
     page: int = Query(1, ge=1),
-    per_page: int = Query(100, ge=10, le=10000)
+    per_page: int = Query(120, ge=10, le=10000),
 ):
-    """Sucht Icons in einem Set mit Pagination"""
-    result = catalog.search_icons(
-        set_id=set_id,
-        query=q,
-        style=style,
-        page=page,
-        per_page=per_page
+    """Sucht Icons über den In-Memory-Index: Scope × Lizenz × Style × Text (UND)."""
+    return search_index.search(
+        query=q, scope=scope, set_id=set_id, style=style,
+        license=license, page=page, per_page=per_page,
     )
-    if "error" in result:
-        raise HTTPException(status_code=404, detail=result["error"])
-    return result
+
+
+@router.get("/ai-search")
+async def ai_search(
+    q: str = Query(""),
+    scope: str = Query("all"),
+    license: str = Query(""),
+    per_page: int = Query(120, ge=10, le=10000),
+):
+    """KI-Prosa-Suche: Freitext -> Begriffe (LM-Studio) -> FTS. Graceful ohne KI."""
+    sug = await llm.suggest_terms(q)
+    if not sug.get("terms"):
+        return {"icons": [], "total": 0, "terms": [],
+                "connected": sug.get("connected", False), "error": sug.get("error", "")}
+    import re
+    seen: set[str] = set()
+    icons: list[dict] = []
+    for term in sug["terms"]:
+        if not term:
+            continue
+        r = search_index.search(query=term, scope=scope, license=license, per_page=200)
+        # Ganzes-Wort-Treffer (Wortgrenzen -/_), damit z. B. "rain" nicht "brain" matcht
+        pat = re.compile(rf"(?:^|[-_]){re.escape(term)}(?:[-_]|$)")
+        for ic in r["icons"]:
+            if not pat.search(ic["name"]):
+                continue
+            key = f"{ic['set_id']}/{ic['name']}"
+            if key not in seen:
+                seen.add(key)
+                icons.append(ic)
+    return {"icons": icons[:per_page], "total": len(icons),
+            "terms": sug["terms"], "connected": True}
 
 
 @router.get("/{set_id}/{icon_name}/svg")

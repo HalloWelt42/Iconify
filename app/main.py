@@ -9,7 +9,7 @@ from pathlib import Path
 import logging
 
 from app.config import settings, __version__, ICONS_PATH
-from app.api import sets, icons, font, custom
+from app.api import sets, icons, font, custom, export, llm
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -21,6 +21,8 @@ app.include_router(sets.router, prefix="/api/sets", tags=["sets"])
 app.include_router(icons.router, prefix="/api/icons", tags=["icons"])
 app.include_router(font.router, prefix="/api/font", tags=["font"])
 app.include_router(custom.router, prefix="/api/custom", tags=["custom"])
+app.include_router(export.router, prefix="/api/export", tags=["export"])
+app.include_router(llm.router, prefix="/api/llm", tags=["llm"])
 
 # Static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -54,6 +56,10 @@ async def health():
 @app.on_event("startup")
 async def startup():
     ICONS_PATH.mkdir(parents=True, exist_ok=True)
+    # Such-Index im Hintergrund bauen, damit die erste Suche schon schnell ist
+    import threading
+    from app.services import search_index
+    threading.Thread(target=search_index.build, daemon=True).start()
     logger.info(f"🎨 Iconify v{__version__} gestartet")
     logger.info(f"📁 Icons: {ICONS_PATH}")
     logger.info(f"🌐 http://0.0.0.0:{settings.port}")

@@ -16,12 +16,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
 
-# Highlight.js lokal herunterladen (Atom One Dark Theme)
-RUN curl -sL "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" -o /app/app/static/js/highlight.min.js && \
-    curl -sL "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js" -o /app/app/static/js/hljs-xml.min.js && \
-    curl -sL "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js" -o /app/app/static/js/hljs-css.min.js && \
-    curl -sL "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" -o /app/app/static/css/hljs.css
-
 RUN mkdir -p /app/icons /app/temp
 
 EXPOSE 8766

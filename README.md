@@ -12,15 +12,20 @@ fertige Code-Snippets (SVG / IMG / Webfont) – ohne externe CDN-Abhängigkeit z
 
 - **10 kuratierte Icon-Sets** (Tabler, Lucide, Bootstrap, Font Awesome Free, Heroicons,
   Feather, Remix, Phosphor, Material Symbols, Material Design Icons)
-- **Import on-demand** direkt aus den Originalquellen (GitHub / CDN), vollständig
-  (kein 1000-Icon-Limit), mit Live-Fortschritt
-- **Lizenz-Transparenz**: Lizenz-Badge je Set, Filter nach Lizenz (frei nutzbar /
-  Namensnennung nötig) und Attributions-Hinweis beim Export
-- **Suche** mit Style-Filtern, Lazy-Loading
-- **Eigene Sets** anlegen und per Drag & Drop mit eigenen SVGs befüllen
-- **Icon-Font-Generator** (WOFF2/WOFF/TTF + CSS + Cheatsheet, inkl. `ATTRIBUTION.txt`)
-- **Code-Snippets** pro Icon (Inline-SVG, IMG, Webfont-Klasse, CSS)
-- Hell/Dunkel-Theme, deutschsprachige Oberfläche
+- **Import on-demand** aus den Originalquellen (GitHub-Trees-API), vollständig
+  (kein 1000-Icon-Limit), wiederaufnehmbar, mit Live-Fortschritt
+- **Globale Sofort-Suche** über alle Sets (In-Memory-Index) mit **stapelbaren Facetten**
+  (Geltungsbereich · Lizenz [frei / Namensnennung / mit / ohne] · Stil)
+- **KI-Prosa-Suche** (optional, via LM-Studio / OpenAI-kompatibel): Freitext → passende
+  Icons. Ohne KI läuft die normale Suche unverändert weiter (graceful)
+- **Globale Darstellung live** fürs ganze Grid (Farbe via Material-Palette · Größe ·
+  Hintergrund hell/dunkel); **Klick = SVG kopieren**, ⌘K-Schnellsuche
+- **Kuratier-Werkstatt**: Icons per Drag & Drop ins eigene Set übernehmen (mit Herkunft),
+  eigene SVGs hochladen
+- **Exporte**: Icon-Font (WOFF2 + CSS + Cheatsheet inkl. `ATTRIBUTION.txt`), **SVG-ZIP**,
+  **Sprite-Sheet**, Einzel-Code (Inline-SVG / IMG / Webfont / CSS)
+- **Lizenz-Transparenz**: Lizenz-Badge je Set + Attribution beim Export
+- Hell/Dunkel (System/Auto), deutschsprachige Oberfläche, **kein externes CDN zur Laufzeit**
 
 ## Schnellstart
 

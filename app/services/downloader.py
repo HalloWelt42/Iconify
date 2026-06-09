@@ -13,6 +13,7 @@ from datetime import datetime
 
 from app.config import ICON_SETS, ICONS_PATH, settings
 from app.services.sources import create_source
+from app.services import search_index
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +165,12 @@ class IconDownloader:
             "downloaded_at": datetime.now().isoformat(),
         }
         (output_dir / "meta.json").write_text(json.dumps(meta, indent=2))
+
+        # Such-Index nach dem Download aktualisieren (blockiert die Loop nicht)
+        try:
+            await asyncio.to_thread(search_index.build)
+        except Exception as e:
+            logger.warning(f"Index-Refresh nach {set_id} fehlgeschlagen: {e}")
 
         progress.status = "completed"
         progress.message = f"{total_files} Dateien ({unique_count} Icons)"

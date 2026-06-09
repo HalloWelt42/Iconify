@@ -22,10 +22,12 @@ __pycache__/
 .venv/
 venv/
 
-# Frontend (Svelte/Vite)
-frontend/node_modules/
-frontend/dist/
-frontend/.svelte-kit/
+# Frontend (Svelte/Vite) – aktuell nicht im Repo
+frontend/
+
+# Design-Mockups & Preview – nur lokal, NICHT ins Repo
+mockups/
+preview/
 
 # Betriebssystem / Editor
 .DS_Store
