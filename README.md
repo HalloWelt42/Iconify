@@ -88,7 +88,11 @@ bash .githooks/install.sh          # Git-Hooks aktivieren
 ```
 
 - Backend: FastAPI (`app/`), Icon-Quellen als Strategie-Muster (`app/services/sources.py`)
-- Frontend: Single-Page Vanilla-JS (`app/static/`), kein Build-Schritt
+- Frontend: Single-Page Vanilla-JS (`app/static/`), Oberfläche auf Bootstrap 5
+- Bootstrap-Theme: Quelle `theme/src/iconify.scss`, erzeugt `app/static/vendor/iconify.css`
+  (`cd theme && npm install && npm run build`); Bootstrap-JS und die Schrift Barlow liegen
+  mit `npm run vendor:js` bzw. `npm run vendor:fonts` unter `app/static/vendor/` - zur Laufzeit
+  wird nichts nachgeladen
 - Daten: SVG-Dateien unter `icons/<set>/…`, Metadaten als `meta.json`
 - Branch: `dev`
 

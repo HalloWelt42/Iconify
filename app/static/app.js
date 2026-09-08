@@ -3,18 +3,19 @@ const $ = (s) => document.querySelector(s)
 const $$ = (s) => [...document.querySelectorAll(s)]
 const app = $('#app'), root = document.documentElement
 
-// ---- UI-Icons (echte SVGs statt Glyphen) ----
+// ---- UI-Icons (Inline-SVG, keine fremde Icon-Schrift) ----
 const UI = {
-  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
   copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
   expand: '<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.2 17.2l1.4 1.4M18.6 5.4l-1.4 1.4M6.8 17.2l-1.4 1.4"/>',
   moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>',
   close: '<path d="M18 6L6 18M6 6l12 12"/>',
+  down: '<path d="M12 4v12M6 12l6 6 6-6"/>',
 }
 const uisvg = (k, w = 18) => `<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${UI[k]}</svg>`
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
-// ---- API (relativ -> über den Proxy ans echte Backend) ----
+// ---- API ----
 const api = {
   async sets() { return (await fetch('/api/sets')).json() },
   async search(p) {
@@ -32,11 +33,23 @@ const api = {
 const HUES = [['#FFCDD2','#E57373','#F44336','#D32F2F','#B71C1C'],['#F8BBD0','#F06292','#E91E63','#C2185B','#880E4F'],['#E1BEE7','#BA68C8','#9C27B0','#7B1FA2','#4A148C'],['#C5CAE9','#7986CB','#3F51B5','#303F9F','#1A237E'],['#BBDEFB','#64B5F6','#2196F3','#1976D2','#0D47A1'],['#B2DFDB','#4DB6AC','#009688','#00796B','#004D40'],['#C8E6C9','#81C784','#4CAF50','#388E3C','#1B5E20'],['#FFECB3','#FFD54F','#FFC107','#FFA000','#FF6F00'],['#FFCCBC','#FF8A65','#FF5722','#E64A19','#BF360C'],['#F5F5F5','#BDBDBD','#9E9E9E','#616161','#212121']]
 const SW = ['#000000', '#FFFFFF', ...HUES.flat()]
 
-// ---- State ----
-const st = { sets: [], setId: null, scope: 'all', license: '', q: '', style: '', page: 1, pages: 1, loading: false, bg: 'light', codeData: null, codeTab: 'svg', detail: null, wset: null, wicons: [] }
+// ---- Zustand ----
+const st = { sets: [], setId: null, scope: 'all', license: '', q: '', style: '', page: 1, pages: 1, loading: false,
+  bg: 'auto', color: 'auto', codeData: null, codeTab: 'svg', detail: null, wset: null, wicons: [] }
 
-// ---- Utils ----
-function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 1600) }
+// ---- Bausteine von Bootstrap ----
+const bs = {}
+function initComponents() {
+  bs.detail = new bootstrap.Offcanvas('#detail')
+  bs.cmdk = new bootstrap.Modal('#cmdk')
+  bs.settings = new bootstrap.Modal('#settings')
+  bs.newset = new bootstrap.Modal('#newset')
+  bs.toast = new bootstrap.Toast('#toast', { delay: 2200 })
+  bs.facets = bootstrap.Offcanvas.getOrCreateInstance('#facets')
+}
+
+// ---- Hilfen ----
+function toast(m) { $('#toast-body').textContent = m; bs.toast.show() }
 async function copyText(text) {
   try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true } } catch {}
   try { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok } catch { return false }
@@ -44,25 +57,54 @@ async function copyText(text) {
 async function svgText(path) { try { return await (await fetch(path + '.svg')).text() } catch { return '' } }
 async function copyIcon(icon) { const t = await svgText(icon.path); if (t && await copyText(t)) toast('SVG kopiert: ' + icon.name); else toast('Kopieren nicht möglich') }
 
-// ---- Theme (System/Auto + manueller Toggle) ----
-function applyTheme() {
-  const pref = localStorage.getItem('iconify-theme') // null=auto | light | dark
-  const dark = pref ? pref === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
-  root.dataset.theme = dark ? 'dark' : 'light'
-  const tb = document.querySelector('[data-act="theme"]'); if (tb) tb.innerHTML = uisvg(dark ? 'sun' : 'moon', 18)
+// ---- Erscheinungsbild ----
+// Der Kachelgrund bestimmt, welche Icon-Farbe lesbar ist. "Auto" haelt beides
+// automatisch im Kontrast; eine gewaehlte Farbe bleibt dagegen unangetastet.
+const TILE_BG = { light: '#ffffff', dark: '#12100f', checker: 'transparent' }
+function isDark() { return root.dataset.bsTheme === 'dark' }
+function tileBg() { return st.bg === 'auto' ? (isDark() ? '#1b211e' : '#ffffff') : TILE_BG[st.bg] }
+function autoInk() {
+  if (st.bg === 'light') return '#1b2421'
+  if (st.bg === 'dark') return '#e7ece9'
+  return isDark() ? '#e7ece9' : '#1b2421' // auto und Transparenz folgen dem Erscheinungsbild
 }
-function toggleTheme() { const cur = root.dataset.theme; localStorage.setItem('iconify-theme', cur === 'dark' ? 'light' : 'dark'); applyTheme() }
+function applyAppearance() {
+  const ink = st.color === 'auto' ? autoInk() : st.color
+  app.style.setProperty('--tile-bg', tileBg())
+  app.style.setProperty('--ic-color', ink)
+  app.style.setProperty('--ic-on-tile', autoInk())
+  $('#colorbtn').classList.toggle('is-auto', st.color === 'auto')
+  $('#colorbtn').style.background = st.color === 'auto' ? '' : st.color
+  $$('.ic-tile').forEach((t) => t.classList.toggle('is-checker', st.bg === 'checker'))
+}
+function setColor(c) { st.color = c; applyAppearance(); if (st.detail) refreshDetail() }
+function setSize(px) { app.style.setProperty('--ic-size', px + 'px') }
 
-// ---- Sets / Facetten ----
+// ---- Hell / Dunkel ----
+function applyTheme() {
+  const pref = localStorage.getItem('iconify-theme') // null = System
+  const dark = pref ? pref === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+  root.dataset.bsTheme = dark ? 'dark' : 'light'
+  $('[data-act="theme"]').innerHTML = uisvg(dark ? 'sun' : 'moon', 18)
+  applyAppearance()
+}
+function toggleTheme() { localStorage.setItem('iconify-theme', isDark() ? 'light' : 'dark'); applyTheme() }
+
+// ---- Sets / Filter ----
 async function loadSets() {
   st.sets = await api.sets()
   const dl = st.sets.filter((s) => s.downloaded)
   const av = st.sets.filter((s) => !s.downloaded)
-  let html = dl.map((s) => `<div class="setrow" data-set="${s.id}"><span class="nm">${s.name}</span><span class="n">${s.icon_count || ''}</span></div>`).join('')
-  if (av.length) html += '<div class="facet-h" style="margin-top:10px">Verfügbar</div>' +
-    av.map((s) => `<div class="setrow av"><span class="nm">${s.name}</span><button class="dlbtn" data-import="${s.id}" title="Importieren">↓</button></div>`).join('')
+  let html = dl.map((s) => `<button type="button" class="ic-setrow" data-set="${esc(s.id)}"><span class="nm">${esc(s.name)}</span><span class="n">${s.icon_count || ''}</span></button>`).join('')
+  if (av.length) html += '<div class="ic-label mt-3 mb-2 ms-1">Verfügbar</div>' +
+    av.map((s) => `<div class="ic-setrow"><span class="nm text-secondary">${esc(s.name)}</span>
+      <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" data-import="${esc(s.id)}" title="Importieren">${uisvg('down', 14)}</button></div>`).join('')
   $('#sets').innerHTML = html
   if (dl.length && !st.setId) st.setId = dl[0].id
+  markActiveSet()
+}
+function markActiveSet() {
+  $$('.ic-setrow[data-set]').forEach((r) => r.classList.toggle('active', st.scope === 'set' && r.dataset.set === st.setId))
 }
 async function importSet(id) {
   toast('Import gestartet: ' + id)
@@ -79,20 +121,20 @@ async function importSet(id) {
 }
 function selectSet(id) {
   st.setId = id; st.scope = 'set'; st.style = ''; $('#scope').value = 'set'
-  $$('.setrow').forEach((r) => r.classList.toggle('on', r.dataset.set === id))
-  search(false)
+  markActiveSet(); bs.facets.hide(); search(false)
 }
 
-// ---- Suche / Grid ----
-function applyBg() {
-  $('#grid').style.setProperty('--tile-bg', st.bg === 'dark' ? '#0f172a' : st.bg === 'light' ? '#ffffff' : 'transparent')
-  $$('.tile').forEach((t) => t.classList.toggle('bg-checker', st.bg === 'checker'))
-}
+// ---- Suche / Raster ----
 function tileHtml(icon) {
-  return `<button class="tile ${st.bg === 'checker' ? 'bg-checker' : ''}" draggable="true" data-name="${icon.name}" data-style="${icon.style || ''}" data-path="${icon.path}" data-set="${icon.set_id}" title="${icon.name}">
-    ${st.scope !== 'set' ? `<span class="setlbl">${icon.set_id}</span>` : ''}
-    <span class="qa"><span class="qb" data-qa="copy" title="SVG kopieren">${uisvg('copy', 16)}</span><span class="qb" data-qa="detail" title="Detail">${uisvg('expand', 16)}</span></span>
-    <span class="ti" style="--u:url('${icon.path}.svg')"></span><span class="tnm">${icon.name}</span></button>`
+  return `<button type="button" class="ic-tile${st.bg === 'checker' ? ' is-checker' : ''}" draggable="true"
+    data-name="${esc(icon.name)}" data-style="${esc(icon.style || '')}" data-path="${esc(icon.path)}" data-set="${esc(icon.set_id)}" title="${esc(icon.name)}">
+    ${st.scope !== 'set' ? `<span class="ic-set">${esc(icon.set_id)}</span>` : ''}
+    <span class="ic-quick">
+      <span class="btn btn-sm" data-qa="copy" title="SVG kopieren">${uisvg('copy', 15)}</span>
+      <span class="btn btn-sm" data-qa="detail" title="Detail">${uisvg('expand', 15)}</span>
+    </span>
+    <span class="ic-glyph" style="--u:url('${esc(icon.path)}.svg')"></span>
+    <span class="ic-name">${esc(icon.name)}</span></button>`
 }
 async function search(append) {
   if (st.loading) return
@@ -106,141 +148,142 @@ async function search(append) {
     if (!append) renderStyles(r.styles || [])
     $('#grid').insertAdjacentHTML('beforeend', (r.icons || []).map(tileHtml).join(''))
     $('#empty').hidden = (r.total ?? 0) > 0
-    $('#empty').textContent = st.sets.some((s) => s.downloaded) ? 'Keine Treffer.' : 'Noch keine Icons — importiere links ein Set, um loszulegen.'
-    applyBg()
+    $('#empty').textContent = st.sets.some((s) => s.downloaded) ? 'Keine Treffer.' : 'Noch keine Icons - importiere links ein Set, um loszulegen.'
+    applyAppearance()
   } catch { toast('Suche fehlgeschlagen') } finally { st.loading = false }
 }
 function loadMore() { if (st.page < st.pages && !st.loading) { st.page++; search(true) } }
 function renderStyles(styles) {
   $('#styleh').hidden = styles.length < 2
   $('#styles').innerHTML = styles.length < 2 ? '' :
-    `<button class="chip on" data-style="">Alle</button>` + styles.map((s) => `<button class="chip" data-style="${s}">${s}</button>`).join('')
+    `<button type="button" class="btn btn-sm btn-outline-primary rounded-pill active" data-style="">Alle</button>` +
+    styles.map((s) => `<button type="button" class="btn btn-sm btn-outline-primary rounded-pill" data-style="${esc(s)}">${esc(s)}</button>`).join('')
 }
 
 // ---- Detail ----
 async function openDetail(icon) {
-  st.detail = icon; $('#dname').textContent = icon.name; $('#scrim').classList.add('show')
-  $('#dpal').hidden = true; $('#palcaret').textContent = '▸'
+  st.detail = icon; $('#dname').textContent = icon.name
   $('#dsize').value = 128; $('#dsizev').textContent = '128px'; $('#code').textContent = '…'
+  bs.detail.show()
   await refreshDetail()
 }
 async function refreshDetail() {
   const i = st.detail; if (!i) return
   const size = +$('#dsize').value
-  const color = getComputedStyle(app).getPropertyValue('--ic-color').trim() || '#000000'
+  const color = getComputedStyle(app).getPropertyValue('--ic-color').trim() || '#1b2421'
   try {
     const d = await api.code(i.set_id || st.setId, i.name, i.style, size, color)
     st.codeData = d
-    $('#dprev').innerHTML = d.svg || `<span class="ti" style="--u:url('${i.path}.svg');width:${size}px;height:${size}px"></span>`
+    $('#dprev').innerHTML = d.svg || `<span class="ic-glyph" style="--u:url('${esc(i.path)}.svg');width:${size}px;height:${size}px"></span>`
     renderCode()
-    $('#dlic').innerHTML = d.license ? `Lizenz: <b>${d.license}</b>${d.license_url ? ` · <a href="${d.license_url}" target="_blank" rel="noopener">Lizenztext</a>` : ''}${d.requires_attribution ? ' · Namensnennung nötig' : ''}` : ''
+    $('#dlic').innerHTML = d.license
+      ? `Lizenz: <b>${esc(d.license)}</b>${d.license_url ? ` · <a href="${esc(d.license_url)}" target="_blank" rel="noopener">Lizenztext</a>` : ''}${d.requires_attribution ? ' · Namensnennung nötig' : ''}`
+      : ''
   } catch { $('#code').textContent = 'Fehler' }
 }
 function renderCode() {
   const d = st.codeData || {}
   const map = { svg: d.svg, img: d.img, font: d.font_html, css: d.font_css }
-  $('#code').textContent = map[st.codeTab] || '— nicht verfügbar —'
+  $('#code').textContent = map[st.codeTab] || '- nicht verfügbar -'
 }
 
-// ---- Appearance ----
-function setSize(px) { app.style.setProperty('--ic-size', px + 'px') }
-function setColor(c) { app.style.setProperty('--ic-color', c); $('#colorbtn').style.background = c; const ch = $('#dchip'); if (ch) ch.style.background = c }
+// ---- Farbfelder ----
+$('#palettepop').innerHTML = SW.map((c) => `<button type="button" class="ic-sw" style="--c:${c}" data-gcolor="${c}" title="${c}"></button>`).join('')
+$('#dpal').innerHTML = `<button type="button" class="ic-sw" style="--c:linear-gradient(135deg,#fff 0 50%,#1b2421 50%)" data-gcolor="auto" title="Automatisch"></button>` +
+  SW.map((c) => `<button type="button" class="ic-sw" style="--c:${c}" data-gcolor="${c}" title="${c}"></button>`).join('')
 
-// ---- Palette-Popover ----
-$('#palettepop').innerHTML = SW.map((c) => `<button class="sw" style="--c:${c};width:16px;height:16px" data-gcolor="${c}"></button>`).join('')
-$('#dpal').innerHTML = SW.map((c) => `<button class="sw" style="--c:${c}" data-dcolor="${c}"></button>`).join('')
-
-// ---- Events ----
+// ---- Ereignisse ----
 app.addEventListener('click', async (e) => {
   const act = e.target.closest('[data-act]')?.dataset.act
   if (act === 'theme') return toggleTheme()
-  if (act === 'closed') return $('#scrim').classList.remove('show')
-  if (act === 'togglepal') { const p = $('#dpal'); p.hidden = !p.hidden; $('#palcaret').textContent = p.hidden ? '▸' : '▾'; return }
-  if (act === 'newset') return newWset()
+  if (act === 'newset') return openNewset()
   if (act === 'exp-font') return exportAction('font')
   if (act === 'exp-zip') return exportAction('zip')
   if (act === 'exp-sprite') return exportAction('sprite')
   if (act === 'ai') return aiSearch()
   if (act === 'settings') return openSettings()
-  if (act === 'closeset') return $('#settings').classList.remove('show')
   if (act === 'llm-test') return llmTest()
   if (act === 'llm-save') return llmSave(false)
-  const rm = e.target.closest('[data-rm]'); if (rm) { e.stopPropagation(); removeWicon(rm.dataset.rm); return }
   if (act === 'cmdk') return openCmd()
   if (act === 'copysvg') { if (st.codeData?.svg) { await copyText(st.codeData.svg); toast('SVG kopiert') } return }
   if (act === 'dl') { if (st.detail) { const a = document.createElement('a'); a.href = st.detail.path + '.svg'; a.download = st.detail.name + '.svg'; a.click() } return }
 
-  const cb = e.target.closest('#colorbtn'); if (cb) { $('#palettepop').hidden = !$('#palettepop').hidden; return }
-  const gc = e.target.closest('[data-gcolor]'); if (gc) { setColor(gc.dataset.gcolor); $('#palettepop').hidden = true; toast('Farbe: ' + gc.dataset.gcolor); return }
-  const dc = e.target.closest('[data-dcolor]'); if (dc) { setColor(dc.dataset.dcolor); refreshDetail(); $('#dpal').hidden = true; $('#palcaret').textContent = '▸'; return }
-
-  const seg = e.target.closest('[data-seg] button')
-  if (seg) { const g = seg.closest('[data-seg]').dataset.seg; seg.parentElement.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b === seg))
-    if (g === 'bg') { st.bg = seg.dataset.v; applyBg() }
-    if (g === 'dens') { const c = seg.dataset.v === 'comp'; $('#grid').style.setProperty('--tile-min', c ? '84px' : '112px'); $('#grid').style.setProperty('--tile-gap', c ? '10px' : '16px') } return }
+  const rm = e.target.closest('[data-rm]'); if (rm) { e.stopPropagation(); return removeWicon(rm.dataset.rm) }
+  const gc = e.target.closest('[data-gcolor]')
+  if (gc) { setColor(gc.dataset.gcolor); toast(gc.dataset.gcolor === 'auto' ? 'Farbe: automatisch' : 'Farbe: ' + gc.dataset.gcolor); return }
 
   const imp = e.target.closest('[data-import]'); if (imp) { e.stopPropagation(); return importSet(imp.dataset.import) }
-  const setrow = e.target.closest('.setrow'); if (setrow && setrow.dataset.set) return selectSet(setrow.dataset.set)
-  const lc = e.target.closest('#lic .chip'); if (lc) { st.license = lc.dataset.lic; $$('#lic .chip').forEach((c) => c.classList.toggle('on', c === lc)); search(false); return }
-  const chip = e.target.closest('#styles .chip'); if (chip) { st.style = chip.dataset.style; $$('#styles .chip').forEach((c) => c.classList.toggle('on', c === chip)); search(false); return }
-  const ct = e.target.closest('.ctab'); if (ct) { st.codeTab = ct.dataset.t; $$('.ctab').forEach((c) => c.classList.toggle('on', c === ct)); renderCode(); return }
+  const setrow = e.target.closest('.ic-setrow[data-set]'); if (setrow) return selectSet(setrow.dataset.set)
+
+  const lc = e.target.closest('#lic [data-lic]')
+  if (lc) { st.license = lc.dataset.lic; $$('#lic [data-lic]').forEach((c) => c.classList.toggle('active', c === lc)); search(false); return }
+  const chip = e.target.closest('#styles [data-style]')
+  if (chip) { st.style = chip.dataset.style; $$('#styles [data-style]').forEach((c) => c.classList.toggle('active', c === chip)); search(false); return }
+  const ct = e.target.closest('#ctabs [data-t]')
+  if (ct) { st.codeTab = ct.dataset.t; $$('#ctabs [data-t]').forEach((c) => c.classList.toggle('active', c === ct)); renderCode(); return }
 
   const qa = e.target.closest('[data-qa]')
-  const tile = e.target.closest('.tile')
+  const tile = e.target.closest('.ic-tile[data-name]')
   if (tile) {
     const icon = { name: tile.dataset.name, style: tile.dataset.style, path: tile.dataset.path, set_id: tile.dataset.set || st.setId }
     if (qa) { e.stopPropagation(); if (qa.dataset.qa === 'detail') openDetail(icon); else copyIcon(icon); return }
     copyIcon(icon)
   }
 })
-$('#scrim').addEventListener('click', (e) => { if (!e.target.closest('[data-stop]')) $('#scrim').classList.remove('show') })
-document.addEventListener('click', (e) => { if (!e.target.closest('#colorbtn') && !e.target.closest('#palettepop')) $('#palettepop').hidden = true }, true)
 
 let qt
 $('#q').addEventListener('input', (e) => { st.q = e.target.value; clearTimeout(qt); qt = setTimeout(() => search(false), 220) })
+$('#q').addEventListener('keydown', (e) => { if (e.key === 'Enter') aiSearch() })
 $('#scope').addEventListener('change', (e) => {
   st.scope = e.target.value
   if (st.scope === 'set' && !st.setId) { const f = st.sets.find((s) => s.downloaded); if (f) st.setId = f.id }
-  $$('.setrow').forEach((r) => r.classList.toggle('on', st.scope === 'set' && r.dataset.set === st.setId))
-  search(false)
+  markActiveSet(); search(false)
 })
 $('#size').addEventListener('input', (e) => setSize(e.target.value))
-$('#dsize').addEventListener('input', (e) => { $('#dsizev').textContent = e.target.value + 'px'; clearTimeout(qt); qt = setTimeout(refreshDetail, 180) })
+let dt
+$('#dsize').addEventListener('input', (e) => { $('#dsizev').textContent = e.target.value + 'px'; clearTimeout(dt); dt = setTimeout(refreshDetail, 180) })
+$('#detail').addEventListener('hidden.bs.offcanvas', () => { st.detail = null })
 
-// Infinite scroll
-new IntersectionObserver((ents) => { if (ents[0].isIntersecting) loadMore() }, { rootMargin: '500px' }).observe($('#sentinel'))
+$$('[name="ic-bg"]').forEach((r) => r.addEventListener('change', () => { st.bg = r.value; applyAppearance() }))
+$$('[name="ic-dens"]').forEach((r) => r.addEventListener('change', () => {
+  const c = r.value === 'comp'
+  $('#grid').style.setProperty('--tile-min', c ? '86px' : '116px')
+  $('#grid').style.setProperty('--tile-gap', c ? '.625rem' : '1rem')
+}))
+$$('[name="ic-mode"]').forEach((r) => r.addEventListener('change', () => {
+  app.dataset.mode = r.value
+  $('#wpane').classList.toggle('d-none', r.value !== 'workshop')
+  if (r.value === 'workshop') loadWsets()
+}))
 
-// ---- ⌘K ----
+// Endloses Nachladen
+new IntersectionObserver((ents) => { if (ents[0].isIntersecting) loadMore() }, { root: $('#results'), rootMargin: '500px' }).observe($('#sentinel'))
+
+// ---- Schnellsuche ----
 let cmdRes = []
-function openCmd() { $('#cmdk').classList.add('show'); $('#cmdq').value = ''; $('#cmdlist').innerHTML = ''; $('#cmdq').focus() }
+function openCmd() { $('#cmdq').value = ''; $('#cmdlist').innerHTML = ''; bs.cmdk.show() }
+$('#cmdk').addEventListener('shown.bs.modal', () => $('#cmdq').focus())
 async function cmdSearch(q) {
   const r = await api.search({ set_id: st.setId, q, scope: st.scope, license: st.license, page: 1 })
   cmdRes = (r.icons || []).slice(0, 20)
-  $('#cmdlist').innerHTML = cmdRes.map((i, n) => `<div class="cmdk-it ${n === 0 ? 'sel' : ''}" data-i="${n}"><span class="ti" style="--u:url('${i.path}.svg')"></span>${i.name}<span style="margin-left:auto;color:var(--mut);font-size:11px">kopieren</span></div>`).join('')
+  $('#cmdlist').innerHTML = cmdRes.map((i, n) => `<button type="button" class="ic-cmd-item${n === 0 ? ' active' : ''}" data-i="${n}">
+    <span class="ic-glyph" style="--u:url('${esc(i.path)}.svg')"></span>${esc(i.name)}
+    <span class="ms-auto small text-secondary">kopieren</span></button>`).join('')
 }
 $('#cmdq').addEventListener('input', (e) => cmdSearch(e.target.value))
-$('#cmdlist').addEventListener('click', (e) => { const it = e.target.closest('[data-i]'); if (it) { copyIcon(cmdRes[+it.dataset.i]); $('#cmdk').classList.remove('show') } })
-$('#cmdk').addEventListener('click', (e) => { if (!e.target.closest('[data-stop]')) $('#cmdk').classList.remove('show') })
-$('#cmdq').addEventListener('keydown', (e) => { if (e.key === 'Enter' && cmdRes[0]) { copyIcon(cmdRes[0]); $('#cmdk').classList.remove('show') } })
+$('#cmdlist').addEventListener('click', (e) => { const it = e.target.closest('[data-i]'); if (it) { copyIcon(cmdRes[+it.dataset.i]); bs.cmdk.hide() } })
+$('#cmdq').addEventListener('keydown', (e) => { if (e.key === 'Enter' && cmdRes[0]) { copyIcon(cmdRes[0]); bs.cmdk.hide() } })
 document.addEventListener('keydown', (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openCmd() }
-  if (e.key === 'Escape') { $('#cmdk').classList.remove('show'); $('#scrim').classList.remove('show') }
   if (e.key === '/' && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) { e.preventDefault(); $('#q').focus() }
 })
 
-// Mode (Werkstatt kommt in K3)
-$$('.modesw [data-mode]').forEach((b) => b.addEventListener('click', () => {
-  app.dataset.mode = b.dataset.mode
-  $$('.modesw button').forEach((x) => x.classList.toggle('on', x === b))
-  if (b.dataset.mode === 'workshop') loadWsets()
-}))
-
-// ---- Werkstatt (K3) ----
+// ---- Werkstatt ----
 function loadWsets() {
   const custom = st.sets.filter((s) => s.is_custom)
   $('#wset').innerHTML = custom.length
-    ? custom.map((s) => `<option value="${s.id}">${s.name}</option>`).join('')
-    : '<option value="">— noch kein eigenes Set —</option>'
+    ? custom.map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')
+    : '<option value="">- noch kein eigenes Set -</option>'
   st.wset = custom.length ? custom[0].id : null
   if (st.wset) $('#wset').value = st.wset
   loadWicons()
@@ -253,19 +296,23 @@ async function loadWicons() {
 function renderWGrid(icons) {
   st.wicons = icons
   $('#wempty').hidden = icons.length > 0
-  $('#wgrid').innerHTML = icons.map((i) => `<div class="tile wtile ${st.bg === 'checker' ? 'bg-checker' : ''}" title="${i.name}">
-    <span class="rm" data-rm="${i.name}" title="Entfernen">${uisvg('close', 13)}</span>
-    <span class="ti" style="--u:url('${i.path}.svg')"></span><span class="tnm">${i.name}</span>
-    <span class="worigin">${i.origin && i.origin !== 'eigen' ? 'aus ' + i.origin : 'eigen'}</span></div>`).join('')
+  $('#wgrid').innerHTML = icons.map((i) => `<div class="ic-tile${st.bg === 'checker' ? ' is-checker' : ''}" title="${esc(i.name)}">
+    <button type="button" class="btn btn-sm btn-outline-danger ic-remove" data-rm="${esc(i.name)}" title="Entfernen">${uisvg('close', 12)}</button>
+    <span class="ic-glyph" style="--u:url('${esc(i.path)}.svg')"></span><span class="ic-name">${esc(i.name)}</span>
+    <span class="ic-origin">${i.origin && i.origin !== 'eigen' ? 'aus ' + esc(i.origin) : 'eigen'}</span></div>`).join('')
 }
-async function newWset() {
-  const name = prompt('Name des eigenen Sets:')?.trim(); if (!name || name.length < 2) return
+function openNewset() { $('#newset-name').value = ''; bs.newset.show() }
+$('#newset').addEventListener('shown.bs.modal', () => $('#newset-name').focus())
+$('#newset-form').addEventListener('submit', async (e) => {
+  e.preventDefault()
+  const name = $('#newset-name').value.trim(); if (name.length < 2) return
+  bs.newset.hide()
   try {
     const r = await (await fetch('/api/custom/sets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) })).json()
-    if (r.success) { await loadSets(); loadWsets(); st.wset = r.set_id; $('#wset').value = r.set_id; loadWicons(); toast('Set „' + name + '" erstellt') }
+    if (r.success) { await loadSets(); loadWsets(); st.wset = r.set_id; $('#wset').value = r.set_id; loadWicons(); toast('Set "' + name + '" erstellt') }
     else toast(r.error || 'Konnte Set nicht anlegen')
   } catch { toast('Fehler') }
-}
+})
 async function removeWicon(name) {
   if (!st.wset) return
   try { await fetch(`/api/custom/sets/${encodeURIComponent(st.wset)}/icons/${encodeURIComponent(name)}`, { method: 'DELETE' }); loadWicons() } catch {}
@@ -274,7 +321,7 @@ async function wDrop(p) {
   if (!st.wset) { toast('Erst ein Ziel-Set wählen oder anlegen'); return }
   try {
     const r = await (await fetch(`/api/custom/sets/${encodeURIComponent(st.wset)}/icons/from`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ src_set: p.set_id, name: p.name, style: p.style }) })).json()
-    if (r.success) { toast('„' + r.name + '" hinzugefügt'); loadWicons() } else toast(r.detail || 'Konnte nicht hinzufügen')
+    if (r.success) { toast('"' + r.name + '" hinzugefügt'); loadWicons() } else toast(r.detail || 'Konnte nicht hinzufügen')
   } catch { toast('Fehler beim Hinzufügen') }
 }
 async function exportAction(kind) {
@@ -282,41 +329,55 @@ async function exportAction(kind) {
   const icons = st.wicons.map((i) => ({ set_id: st.wset, name: i.name, style: '' }))
   const name = st.wset.replace('custom-', '')
   if (kind === 'font') {
-    try { const r = await (await fetch('/api/font/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ icons, font_name: name }) })).json(); if (r.success) { location.href = r.download_url; toast('Font erzeugt') } else toast(r.error || 'Font fehlgeschlagen') } catch { toast('Font fehlgeschlagen') }
+    try {
+      const r = await (await fetch('/api/font/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ icons, font_name: name }) })).json()
+      if (r.success) { location.href = r.download_url; toast('Font erzeugt') } else toast(r.error || 'Font fehlgeschlagen')
+    } catch { toast('Font fehlgeschlagen') }
     return
   }
   const ep = kind === 'zip' ? '/api/export/zip' : '/api/export/sprite'
   try {
     const resp = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ icons, name }) })
-    const blob = await resp.blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = kind === 'zip' ? name + '.zip' : name + '-sprite.svg'; a.click(); URL.revokeObjectURL(a.href)
+    const blob = await resp.blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+    a.download = kind === 'zip' ? name + '.zip' : name + '-sprite.svg'; a.click(); URL.revokeObjectURL(a.href)
     toast(kind === 'zip' ? 'ZIP geladen' : 'Sprite geladen')
   } catch { toast('Export fehlgeschlagen') }
 }
 $('#wset').addEventListener('change', (e) => { st.wset = e.target.value; loadWicons() })
-app.addEventListener('dragstart', (e) => { const t = e.target.closest('.tile[draggable]'); if (t && t.dataset.name) e.dataTransfer.setData('text/plain', JSON.stringify({ set_id: t.dataset.set || st.setId, name: t.dataset.name, style: t.dataset.style || '' })) })
-;(() => { const wt = $('#wtarget'); if (!wt) return; wt.addEventListener('dragover', (e) => { e.preventDefault(); wt.classList.add('drag') }); wt.addEventListener('dragleave', () => wt.classList.remove('drag')); wt.addEventListener('drop', (e) => { e.preventDefault(); wt.classList.remove('drag'); try { wDrop(JSON.parse(e.dataTransfer.getData('text/plain'))) } catch {} }) })()
+app.addEventListener('dragstart', (e) => {
+  const t = e.target.closest('.ic-tile[draggable]')
+  if (t && t.dataset.name) e.dataTransfer.setData('text/plain', JSON.stringify({ set_id: t.dataset.set || st.setId, name: t.dataset.name, style: t.dataset.style || '' }))
+})
+;(() => {
+  const wt = $('#wtarget')
+  wt.addEventListener('dragover', (e) => { e.preventDefault(); wt.classList.add('is-drag') })
+  wt.addEventListener('dragleave', () => wt.classList.remove('is-drag'))
+  wt.addEventListener('drop', (e) => { e.preventDefault(); wt.classList.remove('is-drag'); try { wDrop(JSON.parse(e.dataTransfer.getData('text/plain'))) } catch {} })
+})()
 
-// ---- K4: KI-Prosa-Suche + Einstellungen (LM-Studio) ----
+// ---- KI-Suche und Einstellungen ----
 async function aiSearch() {
   if (!st.q.trim()) { toast('Erst einen Suchbegriff eingeben'); return }
   toast('KI denkt…')
   try {
     const d = await (await fetch('/api/icons/ai-search?q=' + encodeURIComponent(st.q) + '&license=' + st.license)).json()
-    if (!d.connected) { toast('KI nicht verbunden — siehe Einstellungen ⚙'); return }
-    if (!d.icons || !d.icons.length) { toast('KI: keine Treffer für „' + st.q + '"'); return }
-    st.scope = 'all'; $('#scope').value = 'all'; st.page = 1; st.pages = 1
-    $('#grid').innerHTML = d.icons.map(tileHtml).join(''); applyBg()
+    if (!d.connected) { toast('KI nicht verbunden - siehe Einstellungen'); return }
+    if (!d.icons || !d.icons.length) { toast('KI: keine Treffer für "' + st.q + '"'); return }
+    st.scope = 'all'; $('#scope').value = 'all'; st.page = 1; st.pages = 1; markActiveSet()
+    $('#grid').innerHTML = d.icons.map(tileHtml).join(''); applyAppearance()
     $('#cnt').textContent = d.total; $('#empty').hidden = true
     toast('KI-Treffer: ' + d.terms.join(', '))
   } catch { toast('KI-Suche fehlgeschlagen') }
 }
 function showLlmStatus(s) {
   const el = $('#llm-status')
-  if (s && s.connected) { el.className = 'llm-status ok'; el.textContent = 'Verbunden · Modelle: ' + ((s.models || []).join(', ') || '—') }
-  else { el.className = 'llm-status err'; el.textContent = 'Nicht verbunden' + (s && s.error ? ' · ' + s.error : '') }
+  const ok = s && s.connected
+  el.className = 'alert py-2 px-3 small mb-0 ' + (ok ? 'alert-success' : 'alert-danger')
+  el.textContent = ok ? 'Verbunden · Modelle: ' + ((s.models || []).join(', ') || '-')
+                      : 'Nicht verbunden' + (s && s.error ? ' · ' + s.error : '')
 }
 async function openSettings() {
-  $('#settings').classList.add('show')
+  bs.settings.show()
   try {
     const d = await (await fetch('/api/llm/config')).json()
     $('#llm-url').value = d.config.base_url || ''
@@ -333,15 +394,15 @@ async function llmSave(silent) {
   } catch { if (!silent) toast('Speichern fehlgeschlagen') }
 }
 async function llmTest() {
-  $('#llm-status').className = 'llm-status'; $('#llm-status').textContent = 'Teste…'
+  const el = $('#llm-status'); el.className = 'alert alert-secondary py-2 px-3 small mb-0'; el.textContent = 'Teste…'
   await llmSave(true)
   try { showLlmStatus(await (await fetch('/api/llm/test', { method: 'POST' })).json()) } catch { showLlmStatus({ connected: false, error: 'Test fehlgeschlagen' }) }
 }
-$('#settings').addEventListener('click', (e) => { if (!e.target.closest('[data-stop]')) $('#settings').classList.remove('show') })
-$('#q').addEventListener('keydown', (e) => { if (e.key === 'Enter') aiSearch() })
 
-// ---- Init ----
+// ---- Start ----
+initComponents()
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (!localStorage.getItem('iconify-theme')) applyTheme() })
-applyTheme(); setColor(getComputedStyle(app).getPropertyValue('--ic-color').trim() || '#1b2421'); setSize(40)
+applyTheme(); setSize(40)
+$('#wpane').classList.add('d-none')
 api.health().then((h) => { $('#ver').textContent = 'v' + h.version }).catch(() => {})
 loadSets().then(() => search(false)).catch(() => toast('Backend nicht erreichbar'))

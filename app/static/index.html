@@ -1,144 +1,261 @@
 <!doctype html>
-<html lang="de" data-theme="light">
+<html lang="de" data-bs-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Iconify</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/vendor/fonts/barlow.css?v=3.1.0">
+<link rel="stylesheet" href="/static/vendor/iconify.css?v=3.1.0">
 </head>
 <body>
-<div id="app" data-mode="browse">
-  <header class="topbar">
-    <div class="brand"><span class="logo">◆</span> Iconify <span class="ver" id="ver">v3.0.0</span></div>
-    <div class="modesw">
-      <button class="on" data-mode="browse">Stöbern</button>
-      <button data-mode="workshop" title="Eigenes Set kuratieren">Werkstatt</button>
+<div class="ic-app" id="app" data-mode="browse">
+
+  <!-- Kopfzeile -->
+  <header class="d-flex align-items-center gap-2 gap-md-3 px-3 px-md-4 pt-3 pb-2 flex-wrap">
+    <button class="btn btn-outline-secondary d-lg-none" type="button"
+            data-bs-toggle="offcanvas" data-bs-target="#facets" aria-controls="facets" aria-label="Filter">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="ic-brand"><span class="ic-logo">&#9670;</span> Iconify
+      <span class="badge rounded-pill text-bg-primary" id="ver">v3.1.0</span></span>
+
+    <div class="ic-modes ms-1">
+      <div class="btn-group btn-group-sm" role="group" aria-label="Ansicht">
+        <input type="radio" class="btn-check" name="ic-mode" id="mode-browse" value="browse" checked>
+        <label class="btn btn-outline-primary" for="mode-browse">Stöbern</label>
+        <input type="radio" class="btn-check" name="ic-mode" id="mode-workshop" value="workshop">
+        <label class="btn btn-outline-primary" for="mode-workshop">Werkstatt</label>
+      </div>
     </div>
-    <div class="top-right">
-      <button class="kbd" data-act="cmdk">⌘K</button>
-      <button class="iconbtn" data-act="theme" title="Hell / Dunkel / Auto">◐</button>
-      <button class="iconbtn" data-act="settings" title="Einstellungen (KI / LM-Studio)">⚙</button>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-outline-secondary d-none d-md-inline-flex ic-kbd" data-act="cmdk" type="button">&#8984;K</button>
+      <button class="btn btn-outline-secondary" data-act="theme" type="button" title="Hell / Dunkel" aria-label="Hell oder Dunkel"></button>
+      <button class="btn btn-outline-secondary" data-act="settings" type="button" title="Einstellungen" aria-label="Einstellungen">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.4-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
     </div>
   </header>
 
-  <div class="searchwrap">
-    <div class="search">
-      <span class="mag"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
-      <input id="q" placeholder="Icons durchsuchen…" autocomplete="off">
-      <select class="scope" id="scope">
+  <!-- Suche -->
+  <div class="d-flex justify-content-center px-3 px-md-4 pb-2">
+    <div class="input-group input-group-lg ic-search shadow-sm">
+      <span class="input-group-text bg-body text-secondary">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </span>
+      <input id="q" class="form-control border-start-0 border-end-0" placeholder="Icons durchsuchen…" autocomplete="off" aria-label="Icons durchsuchen">
+      <select class="form-select flex-grow-0 w-auto d-none d-sm-block" id="scope" aria-label="Suchbereich">
         <option value="all">Alle Sets</option>
         <option value="set">Aktuelles Set</option>
         <option value="custom">Eigene Sets</option>
       </select>
-      <button class="aibtn" data-act="ai" title="KI-Prosa-Suche (LM-Studio)">✨ KI</button>
+      <button class="btn ic-ai" data-act="ai" type="button" title="KI-Prosa-Suche">&#10024;<span class="d-none d-sm-inline"> KI</span></button>
     </div>
   </div>
 
-  <div class="appearance">
-    <div class="grp"><span class="grp-l">Farbe</span>
-      <button class="colorbtn" id="colorbtn" title="Material-Palette"></button>
-      <div class="palettepop" id="palettepop" hidden></div>
-    </div>
-    <div class="grp"><span class="grp-l">Größe</span><input type="range" min="20" max="80" value="40" id="size"></div>
-    <div class="grp"><span class="grp-l">Hintergrund</span><div class="seg" data-seg="bg">
-      <button class="on" data-v="light">Hell</button><button data-v="dark">Dunkel</button><button data-v="checker">Transp.</button>
-    </div></div>
-    <div class="sep"></div>
-    <div class="grp"><span class="grp-l">Dichte</span><div class="seg" data-seg="dens">
-      <button class="on" data-v="comf">Komfort</button><button data-v="comp">Kompakt</button>
-    </div></div>
-    <span class="spacer"></span>
-    <span class="count"><b id="cnt">–</b> Treffer</span>
-  </div>
-
-  <div class="body">
-    <aside class="facets">
-      <div class="facet-h">Sets</div>
-      <div id="sets" class="sets"></div>
-      <div class="facet-h">Lizenz</div>
-      <div class="chips" id="lic">
-        <button class="chip on" data-lic="">Alle</button>
-        <button class="chip" data-lic="permissive">Frei</button>
-        <button class="chip" data-lic="attribution">Namensnennung</button>
-        <button class="chip" data-lic="with">Mit</button>
-        <button class="chip" data-lic="without">Ohne</button>
+  <!-- Darstellung -->
+  <div class="mx-3 mx-md-4 mb-2 px-3 py-2 ic-surface d-flex align-items-center flex-wrap ic-toolbar">
+    <div class="d-flex align-items-center gap-2">
+      <span class="ic-label">Farbe</span>
+      <div class="dropdown">
+        <button class="btn ic-swatch is-auto" id="colorbtn" type="button"
+                data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" aria-label="Farbe wählen"></button>
+        <div class="dropdown-menu shadow-lg p-0" aria-labelledby="colorbtn">
+          <button class="dropdown-item small" data-gcolor="auto" type="button">Automatisch (Kontrast zum Hintergrund)</button>
+          <div class="dropdown-divider my-0"></div>
+          <div class="ic-palette" id="palettepop"></div>
+        </div>
       </div>
-      <div class="facet-h" id="styleh" hidden>Stil</div>
-      <div id="styles" class="chips"></div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <label class="ic-label" for="size">Größe</label>
+      <input type="range" class="form-range" min="20" max="80" value="40" id="size">
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <span class="ic-label">Hintergrund</span>
+      <div class="btn-group btn-group-sm" role="group" data-seg="bg">
+        <input type="radio" class="btn-check" name="ic-bg" id="bg-auto" value="auto" checked>
+        <label class="btn btn-outline-secondary" for="bg-auto">Auto</label>
+        <input type="radio" class="btn-check" name="ic-bg" id="bg-light" value="light">
+        <label class="btn btn-outline-secondary" for="bg-light">Hell</label>
+        <input type="radio" class="btn-check" name="ic-bg" id="bg-dark" value="dark">
+        <label class="btn btn-outline-secondary" for="bg-dark">Dunkel</label>
+        <input type="radio" class="btn-check" name="ic-bg" id="bg-checker" value="checker">
+        <label class="btn btn-outline-secondary" for="bg-checker">Transp.</label>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <span class="ic-label">Dichte</span>
+      <div class="btn-group btn-group-sm" role="group" data-seg="dens">
+        <input type="radio" class="btn-check" name="ic-dens" id="dens-comf" value="comf" checked>
+        <label class="btn btn-outline-secondary" for="dens-comf">Komfort</label>
+        <input type="radio" class="btn-check" name="ic-dens" id="dens-comp" value="comp">
+        <label class="btn btn-outline-secondary" for="dens-comp">Kompakt</label>
+      </div>
+    </div>
+
+    <div class="ms-auto small text-secondary"><b class="text-body" id="cnt">–</b> Treffer</div>
+  </div>
+
+  <!-- Rumpf -->
+  <div class="ic-body px-3 px-md-4 pb-3">
+    <aside class="ic-facets offcanvas-lg offcanvas-start" tabindex="-1" id="facets" aria-labelledby="facets-title">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="facets-title">Filter</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#facets" aria-label="Schließen"></button>
+      </div>
+      <div class="offcanvas-body flex-column p-3 p-lg-0">
+        <div class="ic-label mb-2 ms-1">Sets</div>
+        <div id="sets" class="d-flex flex-column gap-1 mb-3"></div>
+        <div class="ic-label mb-2 ms-1">Lizenz</div>
+        <div class="d-flex flex-wrap gap-2 mb-3" id="lic">
+          <button class="btn btn-sm btn-outline-primary rounded-pill active" data-lic="" type="button">Alle</button>
+          <button class="btn btn-sm btn-outline-primary rounded-pill" data-lic="permissive" type="button">Frei</button>
+          <button class="btn btn-sm btn-outline-primary rounded-pill" data-lic="attribution" type="button">Namensnennung</button>
+          <button class="btn btn-sm btn-outline-primary rounded-pill" data-lic="with" type="button">Mit</button>
+          <button class="btn btn-sm btn-outline-primary rounded-pill" data-lic="without" type="button">Ohne</button>
+        </div>
+        <div class="ic-label mb-2 ms-1" id="styleh" hidden>Stil</div>
+        <div id="styles" class="d-flex flex-wrap gap-2"></div>
+      </div>
     </aside>
-    <main class="results" id="results">
-      <div class="grid" id="grid"></div>
-      <div class="sentinel" id="sentinel"></div>
-      <div class="empty" id="empty" hidden></div>
+
+    <main class="ic-results ic-surface" id="results">
+      <div class="ic-grid" id="grid"></div>
+      <div id="sentinel" style="height:1px"></div>
+      <div class="text-center text-secondary py-5" id="empty" hidden></div>
     </main>
-    <aside class="wpane" id="wpane">
-      <div class="wpane-h">
-        <select id="wset"></select>
-        <button class="iconbtn" data-act="newset" title="Neues eigenes Set">+</button>
+
+    <aside class="ic-workshop ic-surface" id="wpane">
+      <div class="d-flex gap-2 align-items-center p-2 border-bottom">
+        <select id="wset" class="form-select form-select-sm" aria-label="Eigenes Set"></select>
+        <button class="btn btn-sm btn-outline-primary flex-shrink-0" data-act="newset" type="button" title="Neues eigenes Set">+</button>
       </div>
-      <div class="wpane-body wtarget" id="wtarget">
-        <div class="grid" id="wgrid" style="--tile-min:78px;--tile-gap:8px"></div>
-        <div class="wempty" id="wempty">Icons aus der Mitte hierher ziehen.</div>
+      <div class="ic-workshop-body" id="wtarget">
+        <div class="ic-grid" id="wgrid" style="--tile-min:82px;--tile-gap:.5rem"></div>
+        <p class="text-center text-secondary small py-4 mb-0" id="wempty">Icons aus der Mitte hierher ziehen.</p>
       </div>
-      <div class="wexport">
-        <button class="btn primary span2" data-act="exp-font">Icon-Font erzeugen</button>
-        <button class="btn" data-act="exp-zip">SVG-ZIP</button>
-        <button class="btn" data-act="exp-sprite">Sprite</button>
+      <div class="d-grid gap-2 p-2 border-top">
+        <button class="btn btn-primary btn-sm" data-act="exp-font" type="button">Icon-Font erzeugen</button>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary btn-sm flex-fill" data-act="exp-zip" type="button">SVG-ZIP</button>
+          <button class="btn btn-outline-secondary btn-sm flex-fill" data-act="exp-sprite" type="button">Sprite</button>
+        </div>
       </div>
     </aside>
   </div>
 
   <!-- Detail -->
-  <div class="scrim" id="scrim">
-    <aside class="drawer" data-stop>
-      <div class="drawer-h"><b id="dname">—</b><button class="iconbtn" data-act="closed" aria-label="Schließen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-      <div class="drawer-body">
-        <div class="dpreview" id="dprev"></div>
-        <div class="block-h">Größe <span id="dsizev">128px</span></div>
-        <input type="range" min="16" max="256" value="128" id="dsize" style="width:100%">
-        <button class="block-h palhead" data-act="togglepal" style="margin-top:12px">Farbe
-          <span class="palhead-r"><span class="colorchip" id="dchip"></span><span id="palcaret">▸</span></span></button>
-        <div class="palette" id="dpal" hidden></div>
-        <div class="block-h" style="margin-top:14px">Code</div>
-        <div class="ctabs" id="ctabs"><button class="ctab on" data-t="svg">SVG</button><button class="ctab" data-t="img">IMG</button><button class="ctab" data-t="font">Font</button><button class="ctab" data-t="css">CSS</button></div>
-        <pre class="code" id="code">—</pre>
-        <div class="license" id="dlic"></div>
-      </div>
-      <div class="drawer-actions">
-        <button class="btn primary" data-act="copysvg">SVG kopieren</button>
-        <button class="btn" data-act="dl">Download</button>
-      </div>
-    </aside>
-  </div>
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="detail" aria-labelledby="dname" style="width:min(440px,94vw)">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title text-break" id="dname">—</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Schließen"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="ic-preview mb-3" id="dprev"></div>
 
-  <!-- ⌘K -->
-  <div class="cmdk" id="cmdk">
-    <div class="cmdk-box" data-stop>
-      <input id="cmdq" placeholder="Icon suchen… (Enter kopiert das erste)">
-      <div class="cmdk-list" id="cmdlist"></div>
+      <div class="d-flex justify-content-between ic-label mb-1">
+        <label for="dsize">Größe</label><span id="dsizev">128px</span>
+      </div>
+      <input type="range" class="form-range mb-3" min="16" max="256" value="128" id="dsize">
+
+      <div class="ic-label mb-1">Farbe</div>
+      <div class="ic-palette px-0 pb-3" id="dpal"></div>
+
+      <div class="ic-label mb-2">Code</div>
+      <ul class="nav nav-pills nav-fill gap-1 mb-2" id="ctabs">
+        <li class="nav-item"><button class="nav-link active btn-sm py-1" data-t="svg" type="button">SVG</button></li>
+        <li class="nav-item"><button class="nav-link btn-sm py-1" data-t="img" type="button">IMG</button></li>
+        <li class="nav-item"><button class="nav-link btn-sm py-1" data-t="font" type="button">Font</button></li>
+        <li class="nav-item"><button class="nav-link btn-sm py-1" data-t="css" type="button">CSS</button></li>
+      </ul>
+      <pre class="ic-code" id="code">—</pre>
+      <p class="small text-secondary mt-3 mb-0" id="dlic"></p>
+    </div>
+    <div class="d-flex gap-2 p-3 border-top">
+      <button class="btn btn-primary flex-fill" data-act="copysvg" type="button">SVG kopieren</button>
+      <button class="btn btn-outline-secondary" data-act="dl" type="button">Download</button>
     </div>
   </div>
 
-  <!-- Einstellungen (KI / LM-Studio) -->
-  <div class="modal" id="settings">
-    <div class="modal-box" data-stop>
-      <div class="modal-h"><b>Einstellungen — KI-Suche (LM-Studio)</b><button class="iconbtn" data-act="closeset" aria-label="Schließen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-      <div class="modal-body">
-        <label class="fld"><span>LM-Studio URL</span><input id="llm-url" placeholder="http://192.168.178.51:1234"></label>
-        <label class="fld"><span>Modell (leer = automatisch)</span><input id="llm-model" placeholder="(automatisch)"></label>
-        <label class="fld row"><input type="checkbox" id="llm-enabled"> KI-Suche aktiv</label>
-        <div class="llm-status" id="llm-status">—</div>
-        <div class="modal-actions">
-          <button class="btn" data-act="llm-test">Verbindung testen</button>
-          <button class="btn primary" data-act="llm-save">Speichern</button>
+  <!-- Schnellsuche -->
+  <div class="modal fade" id="cmdk" tabindex="-1" aria-hidden="true" aria-label="Schnellsuche">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header p-0 border-bottom">
+          <input id="cmdq" class="form-control form-control-lg border-0 shadow-none" placeholder="Icon suchen… (Enter kopiert das erste)" aria-label="Icon suchen">
         </div>
-        <p class="hint">KI ist optional. Ohne erreichbares LM-Studio funktioniert die normale Stichwort-Suche unverändert weiter.</p>
+        <div class="modal-body p-2 ic-cmd-list" id="cmdlist"></div>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <!-- Einstellungen -->
+  <div class="modal fade" id="settings" tabindex="-1" aria-labelledby="settings-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="settings-title">Einstellungen — KI-Suche</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small text-secondary" for="llm-url">Adresse des Sprachmodell-Servers</label>
+            <input id="llm-url" class="form-control" placeholder="http://192.168.178.51:1234">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-secondary" for="llm-model">Modell (leer = automatisch)</label>
+            <input id="llm-model" class="form-control" placeholder="(automatisch)">
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="llm-enabled">
+            <label class="form-check-label" for="llm-enabled">KI-Suche aktiv</label>
+          </div>
+          <div class="alert alert-secondary py-2 px-3 small mb-0" id="llm-status">—</div>
+        </div>
+        <div class="modal-footer">
+          <span class="small text-secondary me-auto d-none d-sm-block">Ohne Sprachmodell bleibt die Stichwort-Suche unverändert nutzbar.</span>
+          <button class="btn btn-outline-secondary" data-act="llm-test" type="button">Verbindung testen</button>
+          <button class="btn btn-primary" data-act="llm-save" type="button">Speichern</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Neues eigenes Set -->
+  <div class="modal fade" id="newset" tabindex="-1" aria-labelledby="newset-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content" id="newset-form">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newset-title">Neues eigenes Set</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label small text-secondary" for="newset-name">Name</label>
+          <input class="form-control" id="newset-name" required minlength="2" maxlength="40" placeholder="z. B. Steuerpult">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Abbrechen</button>
+          <button class="btn btn-primary" type="submit">Anlegen</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+    <div class="toast align-items-center text-bg-dark border-0" id="toast" role="status" aria-live="polite" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toast-body"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Schließen"></button>
+      </div>
+    </div>
+  </div>
 </div>
-<script src="/static/app.js"></script>
+
+<script src="/static/vendor/bootstrap.bundle.min.js?v=3.1.0"></script>
+<script src="/static/app.js?v=3.1.0"></script>
 </body>
 </html>

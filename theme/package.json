@@ -1,0 +1,19 @@
+{
+  "name": "iconify-theme",
+  "version": "1.0.0",
+  "description": "Bootstrap-Theme der Iconify-Oberflaeche",
+  "scripts": {
+    "build": "sass --no-source-map --style=compressed --load-path=node_modules --quiet-deps src/iconify.scss ../app/static/vendor/iconify.css",
+    "vendor:js": "cp node_modules/bootstrap/dist/js/bootstrap.bundle.min.js ../app/static/vendor/",
+    "vendor:fonts": "cp node_modules/@fontsource/barlow/files/barlow-latin-{400,500,600,700}-normal.woff2 ../app/static/vendor/fonts/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@fontsource/barlow": "^5.3.0",
+    "bootstrap": "^5.3.8",
+    "sass": "^1.104.0"
+  },
+  "private": true
+}

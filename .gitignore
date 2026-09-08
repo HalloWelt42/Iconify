@@ -32,3 +32,6 @@ preview/
 # Betriebssystem / Editor
 .DS_Store
 *.swp
+
+# Theme-Werkzeuge (nur zum Bauen des CSS)
+theme/node_modules/

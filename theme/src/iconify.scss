@@ -1,0 +1,600 @@
+// Iconify-Oberflaeche: Bootstrap 5 mit der bestehenden Farbpalette.
+// Erzeugt app/static/vendor/iconify.css - Quelle ist ausschliesslich diese Datei.
+
+// ---------------------------------------------------------------- 1. Palette
+$teal-500: #0d9488; // Akzent hell
+$teal-400: #14b8a6; // Akzent-Verlauf hell
+$teal-300: #2dd4bf; // Akzent dunkel
+$teal-200: #5eead4; // Akzent-Verlauf dunkel
+
+$ink: #1b2421; // Text hell
+$ink-muted: #6c7872;
+$paper: #f6f7f6; // Seitengrund hell
+$paper-raised: #ffffff; // Flaechen hell
+$paper-sunken: #eef1ef;
+
+$night: #0f1311; // Seitengrund dunkel
+$night-raised: #161b19;
+$night-sunken: #1e2421;
+$night-text: #e7ece9;
+$night-muted: #94a39d;
+
+// ------------------------------------------------- 2. Bootstrap-Konfiguration
+$primary: $teal-500;
+$success: #16a34a;
+$warning: #d97706;
+$danger: #dc2626;
+
+$body-bg: $paper;
+$body-color: $ink;
+$body-secondary-color: $ink-muted;
+$body-secondary-bg: $paper-sunken;
+$body-tertiary-bg: #e4e9e6;
+
+$border-color: rgba(20, 30, 28, 0.12);
+$border-radius: 0.75rem;
+$border-radius-sm: 0.5rem;
+$border-radius-lg: 1rem;
+$border-radius-xl: 1.25rem;
+$border-radius-pill: 999px;
+
+$font-family-sans-serif: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+$font-size-base: 0.9375rem;
+$headings-font-weight: 700;
+
+$box-shadow-sm: 0 1px 2px rgba(20, 30, 28, 0.06);
+$box-shadow: 0 1px 2px rgba(20, 30, 28, 0.05), 0 4px 16px rgba(20, 30, 28, 0.06);
+$box-shadow-lg: 0 12px 38px rgba(20, 30, 28, 0.16);
+
+$focus-ring-width: 0.25rem;
+$focus-ring-opacity: 0.18;
+$focus-ring-color: rgba($teal-500, 0.35);
+
+$enable-negative-margins: true;
+
+@import "bootstrap/scss/bootstrap";
+
+// ------------------------------------------------- 3. Eigene Marken (hell)
+:root {
+  --ic-surface: #{$paper-raised};
+  --ic-accent: #{$teal-500};
+  --ic-accent-2: #{$teal-400};
+  --ic-tile-light: #ffffff;
+  --ic-tile-dark: #12100f;
+  --ic-tile-auto: #ffffff;
+  --ic-on-tile-auto: #{$ink};
+  --ic-on-tile: var(--ic-on-tile-auto);
+
+  --ic-size: 40px; // Icon-Kantenlaenge in der Kachel
+  --ic-color: #{$ink}; // Icon-Farbe (Auto oder gewaehlt)
+  --tile-bg: var(--ic-tile-auto);
+  --tile-min: 116px;
+  --tile-gap: 1rem;
+  --ic-topbar-h: auto;
+}
+
+// ------------------------------------- 4. Dunkelvariante (nach den hellen
+// Marken und mit :root davor, damit sie die gleiche Spezifitaet ueberbietet)
+:root[data-bs-theme="dark"] {
+  --bs-body-bg: #{$night};
+  --bs-body-bg-rgb: #{to-rgb($night)};
+  --bs-body-color: #{$night-text};
+  --bs-body-color-rgb: #{to-rgb($night-text)};
+  --bs-secondary-color: #{$night-muted};
+  --bs-secondary-bg: #{$night-sunken};
+  --bs-tertiary-bg: #28302c;
+  --bs-emphasis-color: #ffffff;
+  --bs-border-color: rgba(255, 255, 255, 0.12);
+  --bs-primary: #{$teal-300};
+  --bs-primary-rgb: #{to-rgb($teal-300)};
+  --bs-primary-bg-subtle: #10302b;
+  --bs-primary-border-subtle: #{rgba($teal-300, 0.4)};
+  --bs-primary-text-emphasis: #{$teal-200};
+  --bs-link-color: #{$teal-300};
+  --bs-link-color-rgb: #{to-rgb($teal-300)};
+  --bs-link-hover-color: #{$teal-200};
+  --bs-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.4);
+  --bs-box-shadow-lg: 0 14px 44px rgba(0, 0, 0, 0.6);
+
+  --ic-surface: #{$night-raised};
+  --ic-accent: #{$teal-300};
+  --ic-accent-2: #{$teal-200};
+  --ic-tile-light: #f3f5f4;
+  --ic-tile-dark: #12100f;
+  --ic-tile-auto: #1b211e;
+  --ic-on-tile-auto: #{$night-text};
+}
+
+// Bootstrap faerbt Schaltflaechen nicht je Erscheinungsbild um; im Dunkeln
+// traegt erst der hellere Akzent genug Kontrast.
+:root[data-bs-theme="dark"] {
+  .btn-primary {
+    --bs-btn-bg: #{$teal-300};
+    --bs-btn-border-color: #{$teal-300};
+    --bs-btn-color: #{$night};
+    --bs-btn-hover-bg: #{$teal-200};
+    --bs-btn-hover-border-color: #{$teal-200};
+    --bs-btn-hover-color: #{$night};
+    --bs-btn-active-bg: #{$teal-200};
+    --bs-btn-active-border-color: #{$teal-200};
+    --bs-btn-active-color: #{$night};
+  }
+
+  .btn-outline-primary {
+    --bs-btn-color: #{$teal-300};
+    --bs-btn-border-color: #{rgba($teal-300, 0.55)};
+    --bs-btn-hover-bg: #{$teal-300};
+    --bs-btn-hover-border-color: #{$teal-300};
+    --bs-btn-hover-color: #{$night};
+    --bs-btn-active-bg: #{$teal-300};
+    --bs-btn-active-border-color: #{$teal-300};
+    --bs-btn-active-color: #{$night};
+  }
+
+  .btn-check:checked + .btn-outline-primary {
+    color: #{$night};
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  overflow: hidden; // gescrollt wird in den Spalten, nie die ganze Seite
+  -webkit-font-smoothing: antialiased;
+}
+
+.ic-app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ic-surface {
+  background: var(--ic-surface);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: var(--bs-box-shadow, #{$box-shadow});
+}
+
+.ic-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color);
+}
+
+// Kopfzeile ------------------------------------------------------------------
+.ic-brand {
+  font-weight: 700;
+  font-size: 1.0625rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+}
+
+.ic-brand .ic-logo {
+  color: var(--ic-accent);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.ic-kbd {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+}
+
+// Suche ----------------------------------------------------------------------
+.ic-search {
+  max-width: 780px;
+  width: 100%;
+}
+
+.ic-search .form-control,
+.ic-search .form-select,
+.ic-search .btn {
+  border-color: var(--bs-border-color);
+}
+
+.ic-search .form-control {
+  font-size: 1rem;
+}
+
+.ic-ai {
+  background: linear-gradient(135deg, var(--ic-accent), var(--ic-accent-2));
+  border: 0;
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ic-ai:hover,
+.ic-ai:focus {
+  color: #fff;
+  filter: brightness(1.06);
+}
+
+// Werkzeugleiste -------------------------------------------------------------
+.ic-toolbar {
+  gap: 0.75rem 1.25rem;
+}
+
+.ic-toolbar .form-range {
+  width: 110px;
+}
+
+.ic-swatch {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--bs-border-radius-sm);
+  border: 2px solid var(--bs-border-color);
+  background: var(--ic-color);
+  padding: 0;
+}
+
+.ic-swatch.is-auto {
+  background: linear-gradient(135deg, #ffffff 0 50%, #1b2421 50% 100%);
+}
+
+.ic-palette {
+  display: grid;
+  grid-template-columns: repeat(12, 1.125rem);
+  gap: 0.3125rem;
+  padding: 0.625rem;
+  min-width: auto;
+}
+
+.ic-sw {
+  aspect-ratio: 1;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: var(--c);
+  padding: 0;
+}
+
+.ic-sw:hover,
+.ic-sw:focus-visible {
+  outline: 2px solid var(--ic-accent);
+  outline-offset: 2px;
+}
+
+// Rumpf: drei Spalten --------------------------------------------------------
+.ic-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 0.875rem;
+}
+
+.ic-facets {
+  width: 224px;
+  flex: 0 0 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ic-results {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem;
+}
+
+.ic-setrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 0;
+  border-radius: var(--bs-border-radius-sm);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.ic-setrow:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.ic-setrow.active {
+  background: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary-text-emphasis);
+}
+
+.ic-setrow .nm {
+  flex: 1;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ic-setrow .n {
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+}
+
+.ic-setrow.active .n {
+  color: inherit;
+}
+
+// Kachelraster ---------------------------------------------------------------
+.ic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr));
+  gap: var(--tile-gap);
+}
+
+.ic-tile {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.5rem;
+  background: var(--tile-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  color: var(--ic-on-tile);
+  transition: border-color 0.14s, box-shadow 0.14s, transform 0.14s;
+  overflow: hidden;
+}
+
+.ic-tile:hover,
+.ic-tile:focus-visible {
+  border-color: var(--ic-accent);
+  box-shadow: var(--bs-box-shadow-lg, #{$box-shadow-lg});
+  transform: translateY(-2px);
+  z-index: 1;
+}
+
+.ic-tile.is-checker {
+  background-image:
+    linear-gradient(45deg, rgba(128, 128, 128, 0.22) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(128, 128, 128, 0.22) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(128, 128, 128, 0.22) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(128, 128, 128, 0.22) 75%);
+  background-size: 14px 14px;
+  background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+}
+
+.ic-glyph {
+  width: var(--ic-size);
+  height: var(--ic-size);
+  max-width: 100%;
+  background: var(--ic-color);
+  -webkit-mask: var(--u) center / contain no-repeat;
+  mask: var(--u) center / contain no-repeat;
+  flex: 0 0 auto;
+}
+
+.ic-tile .ic-name {
+  font-size: 0.625rem;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.72;
+}
+
+.ic-tile .ic-set {
+  position: absolute;
+  left: 0.375rem;
+  top: 0.375rem;
+  max-width: calc(100% - 4.25rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.5625rem;
+  padding: 0.0625rem 0.3125rem;
+  border-radius: 0.3125rem;
+  background: rgba(128, 128, 128, 0.22);
+  color: inherit;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.ic-quick {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  display: flex;
+  gap: 0.375rem;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 0.12s, transform 0.12s;
+}
+
+.ic-tile:hover .ic-quick,
+.ic-tile:focus-within .ic-quick {
+  opacity: 1;
+  transform: none;
+}
+
+.ic-quick .btn {
+  --bs-btn-padding-x: 0;
+  --bs-btn-padding-y: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ic-surface);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+.ic-quick .btn:hover {
+  background: var(--ic-accent);
+  border-color: var(--ic-accent);
+  color: #fff;
+}
+
+// Werkstatt ------------------------------------------------------------------
+.ic-workshop {
+  width: 312px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ic-workshop-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+}
+
+.ic-workshop-body.is-drag {
+  outline: 2px dashed var(--ic-accent);
+  outline-offset: -0.5rem;
+  background: var(--bs-primary-bg-subtle);
+}
+
+.ic-remove {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 1.375rem;
+  height: 1.375rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.ic-tile:hover .ic-remove,
+.ic-tile:focus-within .ic-remove {
+  display: inline-flex;
+}
+
+.ic-origin {
+  position: absolute;
+  left: 0.375rem;
+  bottom: 0.25rem;
+  font-size: 0.5rem;
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+  background: rgba(128, 128, 128, 0.22);
+  opacity: 0.85;
+}
+
+// Detailbereich --------------------------------------------------------------
+.ic-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 208px;
+  padding: 1rem;
+  border-radius: var(--bs-border-radius-xl);
+  background: var(--tile-bg);
+  color: var(--ic-color);
+  border: 1px solid var(--bs-border-color);
+  overflow: hidden;
+}
+
+.ic-preview svg {
+  max-width: 100%;
+  max-height: 240px;
+  color: var(--ic-color);
+}
+
+.ic-code {
+  margin: 0;
+  padding: 0.8125rem;
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-secondary-bg);
+  font-size: 0.75rem;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+// Schnellsuche ---------------------------------------------------------------
+.ic-cmd-list {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.ic-cmd-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--bs-border-radius-sm);
+  font-size: 0.8125rem;
+}
+
+.ic-cmd-item .ic-glyph {
+  width: 1.25rem;
+  height: 1.25rem;
+  background: currentColor;
+}
+
+.ic-cmd-item:hover,
+.ic-cmd-item.active {
+  background: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary-text-emphasis);
+}
+
+// Kleine Schirme -------------------------------------------------------------
+@include media-breakpoint-down(lg) {
+  .ic-body {
+    gap: 0.5rem;
+  }
+
+  .ic-facets.offcanvas {
+    width: 280px;
+  }
+
+  .ic-workshop {
+    width: 100%;
+  }
+}
+
+@include media-breakpoint-down(md) {
+  :root {
+    --tile-min: 88px;
+    --tile-gap: 0.5rem;
+  }
+
+  .ic-toolbar {
+    gap: 0.5rem 0.875rem;
+  }
+
+  .ic-results {
+    padding: 0.75rem;
+  }
+
+  .ic-tile .ic-set {
+    display: none; // auf kleinen Kacheln nur abgeschnittener Text
+  }
+
+  // Die Umschaltung bekommt auf schmalen Schirmen eine eigene, volle Zeile.
+  .ic-modes {
+    order: 3;
+    flex: 1 0 100%;
+  }
+
+  .ic-modes .btn-group {
+    width: 100%;
+  }
+}
