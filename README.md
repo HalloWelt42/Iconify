@@ -94,6 +94,11 @@ bash .githooks/install.sh          # Git-Hooks aktivieren
   mit `npm run vendor:js` bzw. `npm run vendor:fonts` unter `app/static/vendor/` - zur Laufzeit
   wird nichts nachgeladen
 - Daten: SVG-Dateien unter `icons/<set>/…`, Metadaten als `meta.json`
+- Versionierung: `version.json` ist die einzige Quelle. `tools/version.sh [patch|minor|major|id]`
+  zählt hoch und vergibt eine neue Build-Kennung; der Pre-Commit-Hook in `tools/git-hooks/`
+  erzwingt bei jedem Commit eine eigene Version (einmalig aktivieren mit
+  `git config core.hooksPath tools/git-hooks`). Backend und Oberfläche lesen die Nummer
+  über `/health`, sie steht unten links in der Oberfläche - nirgends fest geschrieben.
 - Branch: `dev`
 
 ## Lizenz
