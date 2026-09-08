@@ -75,6 +75,7 @@ function applyAppearance() {
   app.style.setProperty('--ic-color', ink)
   app.style.setProperty('--ic-on-tile', autoInk())
   $('#colorbtn').classList.toggle('is-auto', st.color === 'auto')
+  markColor()
   $('#colorbtn').style.background = st.color === 'auto' ? '' : st.color
   $$('.ic-tile').forEach((t) => t.classList.toggle('is-checker', st.bg === 'checker'))
 }
@@ -190,9 +191,13 @@ function renderCode() {
 }
 
 // ---- Farbfelder ----
-$('#palettepop').innerHTML = SW.map((c) => `<button type="button" class="ic-sw" style="--c:${c}" data-gcolor="${c}" title="${c}"></button>`).join('')
-$('#dpal').innerHTML = `<button type="button" class="ic-sw" style="--c:linear-gradient(135deg,#fff 0 50%,#1b2421 50%)" data-gcolor="auto" title="Automatisch"></button>` +
-  SW.map((c) => `<button type="button" class="ic-sw" style="--c:${c}" data-gcolor="${c}" title="${c}"></button>`).join('')
+const swHtml = (c, titel = c) => `<button type="button" class="ic-sw" style="--c:${c}" data-gcolor="${c}" title="${titel}" aria-label="${titel}"></button>`
+$('#palettepop').innerHTML = SW.map((c) => swHtml(c)).join('')
+$('#dpal').innerHTML = `<button type="button" class="ic-sw ic-sw-auto" data-gcolor="auto" title="Automatisch" aria-label="Automatisch"></button>` +
+  SW.map((c) => swHtml(c)).join('')
+function markColor() {
+  $$('[data-gcolor]').forEach((b) => b.classList.toggle('is-on', b.dataset.gcolor.toLowerCase() === String(st.color).toLowerCase()))
+}
 
 // ---- Ereignisse ----
 app.addEventListener('click', async (e) => {

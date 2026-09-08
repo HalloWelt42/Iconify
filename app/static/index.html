@@ -46,11 +46,6 @@
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         </span>
         <input id="q" class="form-control border-start-0" placeholder="Icons durchsuchen…" autocomplete="off" aria-label="Suchbegriff">
-        <select class="form-select flex-grow-0 w-auto d-none d-sm-block" id="scope" aria-label="Suchbereich">
-          <option value="all">Alle Sets</option>
-          <option value="set">Aktuelles Set</option>
-          <option value="custom">Eigene Sets</option>
-        </select>
         <button class="btn btn-primary" id="go" data-act="go" type="button">
           <span class="spinner-border spinner-border-sm d-none" id="go-spin" role="status" aria-hidden="true"></span>
           <span id="go-label">Suchen</span>
@@ -63,6 +58,11 @@
           <input type="radio" class="btn-check" name="ic-searchmode" id="sm-ai" value="ai">
           <label class="btn btn-outline-primary" for="sm-ai">&#10024; KI</label>
         </div>
+        <select class="form-select form-select-sm w-auto" id="scope" aria-label="Suchbereich">
+          <option value="all">Alle Sets</option>
+          <option value="set">Aktuelles Set</option>
+          <option value="custom">Eigene Sets</option>
+        </select>
         <span class="small text-secondary" id="searchhint">Sucht sofort im Namen der Icons.</span>
       </div>
     </div>
