@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Zwang zur lueckenlosen Versionierung: jeder Commit traegt eine eigene Version.
+# Zwang zur lückenlosen Versionierung: jeder Commit traegt eine eigene Version.
 # Ist version.json bereits von Hand vorgemerkt, bleibt die Nummer stehen und es
-# gibt nur eine neue Build-Kennung; sonst zaehlt der Hook die Patch-Stelle hoch.
+# gibt nur eine neue Build-Kennung; sonst zählt der Hook die Patch-Stelle hoch.
 set -euo pipefail
 wurzel="$(git rev-parse --show-toplevel)"
 cd "$wurzel"
@@ -13,4 +13,4 @@ else
 fi
 
 git add version.json
-echo "Version fuer diesen Commit: $neu"
+echo "Version für diesen Commit: $neu"
