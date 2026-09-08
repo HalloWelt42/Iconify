@@ -211,7 +211,6 @@ app.addEventListener('click', async (e) => {
   if (act === 'settings') return openSettings()
   if (act === 'llm-test') return llmTest()
   if (act === 'llm-save') return llmSave(false)
-  if (act === 'cmdk') return openCmd()
   if (act === 'copysvg') { if (st.codeData?.svg) { await copyText(st.codeData.svg); toast('SVG kopiert') } return }
   if (act === 'dl') { if (st.detail) { const a = document.createElement('a'); a.href = st.detail.path + '.svg'; a.download = st.detail.name + '.svg'; a.click() } return }
 

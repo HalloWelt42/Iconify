@@ -191,10 +191,16 @@ body {
   line-height: 1;
 }
 
-.ic-kbd {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--bs-secondary-color);
+// Die beiden Knoepfe oben rechts sind gleich grosse Quadrate mit mittigem Zeichen.
+.ic-iconbtn {
+  --bs-btn-padding-x: 0;
+  --bs-btn-padding-y: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
 }
 
 // Suche ----------------------------------------------------------------------

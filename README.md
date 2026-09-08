@@ -1,11 +1,15 @@
 # Iconify
 
+<p align="center">
+  <img src="docs/oberflaeche.png" alt="Iconify: Suche, Filter und Kachelraster der Oberfläche" width="100%">
+</p>
+
 Selbstgehosteter **Icon-Manager & Icon-Font-Generator**. Durchsucht und verwaltet
 populäre Open-Source-Icon-Sets lokal, erzeugt daraus eigene Icon-Fonts und liefert
-fertige Code-Snippets (SVG / IMG / Webfont) – ohne externe CDN-Abhängigkeit zur Laufzeit.
+fertige Code-Snippets (SVG / IMG / Webfont) - ohne externe CDN-Abhängigkeit zur Laufzeit.
 
 > Die Icons werden **nicht** mit dem Repository ausgeliefert. Jede Installation
-> stößt den Import der gewünschten Sets selbst an (siehe „Nutzung"). So bleibt das
+> stößt den Import der gewünschten Sets selbst an (siehe "Nutzung"). So bleibt das
 > Repo schlank und jede:r lädt nur, was gebraucht wird.
 
 ## Features
@@ -41,7 +45,7 @@ Dann im Browser öffnen: **http://localhost:8766**
 
 ## Nutzung
 
-1. In der Seitenleiste unter **„Verfügbar"** ein Set auswählen und auf **↓** klicken –
+1. In der Seitenleiste unter **"Verfügbar"** ein Set auswählen und auf **↓** klicken -
    das Set wird heruntergeladen (Fortschritt wird angezeigt).
 2. Icons durchsuchen, ein Icon anklicken → Vorschau, Größe/Farbe, Code-Snippets.
 3. Über das Sammlungs-Symbol Icons sammeln und einen **eigenen Icon-Font** erzeugen.
@@ -55,7 +59,7 @@ Einstellungen über Umgebungsvariablen (Prefix `ICONIFY_`). Vorlage: [`.env.exam
 |---|---|---|
 | `ICONIFY_PORT` | `8766` | HTTP-Port |
 | `ICONIFY_MAX_CONCURRENT_DOWNLOADS` | `20` | parallele Downloads beim Import |
-| `ICONIFY_GITHUB_TOKEN` | – | optional: höheres GitHub-API-Rate-Limit beim Import |
+| `ICONIFY_GITHUB_TOKEN` | - | optional: höheres GitHub-API-Rate-Limit beim Import |
 
 ## Icon-Sets & Lizenzen
 
@@ -67,7 +71,7 @@ Icons unterliegen den Lizenzen ihrer jeweiligen Projekte:
 | Tabler Icons | MIT |
 | Lucide | ISC |
 | Bootstrap Icons | MIT |
-| Font Awesome Free | CC-BY-4.0 (Icons) – **Namensnennung nötig** |
+| Font Awesome Free | CC-BY-4.0 (Icons) - **Namensnennung nötig** |
 | Heroicons | MIT |
 | Feather | MIT |
 | Remix Icon | Apache-2.0 |
