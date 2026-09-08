@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Zwang zur lueckenlosen Versionierung: jeder Commit traegt eine eigene Version.
+# Ist version.json bereits von Hand vorgemerkt, bleibt die Nummer stehen und es
+# gibt nur eine neue Build-Kennung; sonst zaehlt der Hook die Patch-Stelle hoch.
+set -euo pipefail
+wurzel="$(git rev-parse --show-toplevel)"
+cd "$wurzel"
+
+if git diff --cached --name-only | grep -qx "version.json"; then
+  neu="$("$wurzel/tools/version.sh" id)"
+else
+  neu="$("$wurzel/tools/version.sh" patch)"
+fi
+
+git add version.json
+echo "Version fuer diesen Commit: $neu"

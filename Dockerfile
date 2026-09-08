@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY version.json ./
 COPY app/ ./app/
 
 RUN mkdir -p /app/icons /app/temp

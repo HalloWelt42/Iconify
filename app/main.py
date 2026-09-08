@@ -1,5 +1,5 @@
 """
-Iconify v2.4.0 - Self-hosted Icon Font Manager
+Iconify - Self-hosted Icon Font Manager
 Mit Custom Font Generator und eigenen Icon-Sets
 """
 from fastapi import FastAPI
@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse, Response
 from pathlib import Path
 import logging
 
-from app.config import settings, __version__, ICONS_PATH
+from app.config import settings, __version__, __version_full__, ICONS_PATH
 from app.api import sets, icons, font, custom, export, llm
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -50,7 +50,7 @@ async def favicon():
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "version": __version__}
+    return {"status": "healthy", "version": __version__, "voll": __version_full__}
 
 
 @app.on_event("startup")
@@ -60,6 +60,6 @@ async def startup():
     import threading
     from app.services import search_index
     threading.Thread(target=search_index.build, daemon=True).start()
-    logger.info(f"🎨 Iconify v{__version__} gestartet")
+    logger.info(f"🎨 Iconify {__version_full__} gestartet")
     logger.info(f"📁 Icons: {ICONS_PATH}")
     logger.info(f"🌐 http://0.0.0.0:{settings.port}")

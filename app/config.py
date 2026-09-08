@@ -1,13 +1,26 @@
 """
-Iconify v2.4.0 - Konfiguration
+Iconify - Konfiguration
 Icon-Sets deklarativ: jede Quelle über `source_type` (siehe app/services/sources.py).
 """
+import json
 from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
-__version__ = "3.1.0"
+_VERSION_DATEI = Path(__file__).resolve().parent.parent / "version.json"
+
+
+def _version_lesen() -> tuple[str, str]:
+    """Liest die einzige Versionsquelle (version.json) im Projektwurzelverzeichnis."""
+    try:
+        daten = json.loads(_VERSION_DATEI.read_text(encoding="utf-8"))
+        return str(daten["version"]), str(daten.get("voll") or f"v{daten['version']}")
+    except (OSError, ValueError, KeyError):
+        return "0.0.0", "v0.0.0"
+
+
+__version__, __version_full__ = _version_lesen()
 
 ICONS_PATH = Path("/app/icons")
 

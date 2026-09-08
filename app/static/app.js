@@ -10,6 +10,7 @@ const UI = {
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.2 17.2l1.4 1.4M18.6 5.4l-1.4 1.4M6.8 17.2l-1.4 1.4"/>',
   moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>',
   close: '<path d="M18 6L6 18M6 6l12 12"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
   down: '<path d="M12 4v12M6 12l6 6 6-6"/>',
 }
 const uisvg = (k, w = 18) => `<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${UI[k]}</svg>`
@@ -34,7 +35,7 @@ const HUES = [['#FFCDD2','#E57373','#F44336','#D32F2F','#B71C1C'],['#F8BBD0','#F
 const SW = ['#000000', '#FFFFFF', ...HUES.flat()]
 
 // ---- Zustand ----
-const st = { sets: [], setId: null, scope: 'all', mode: 'word', license: '', q: '', style: '', page: 1, pages: 1, loading: false,
+const st = { sets: [], setId: null, scope: 'all', mode: 'word', workshop: false, license: '', q: '', style: '', page: 1, pages: 1, loading: false,
   bg: 'auto', color: 'auto', codeData: null, codeTab: 'svg', detail: null, wset: null, wicons: [] }
 
 // ---- Bausteine von Bootstrap ----
@@ -132,6 +133,7 @@ function tileHtml(icon) {
     <span class="ic-quick">
       <span class="btn btn-sm" data-qa="copy" title="SVG kopieren">${uisvg('copy', 15)}</span>
       <span class="btn btn-sm" data-qa="detail" title="Detail">${uisvg('expand', 15)}</span>
+      ${st.workshop ? `<span class="btn btn-sm" data-qa="add" title="In die Werkstatt aufnehmen">${uisvg('plus', 15)}</span>` : ''}
     </span>
     <span class="ic-glyph" style="--u:url('${esc(icon.path)}.svg')"></span>
     <span class="ic-name">${esc(icon.name)}</span></button>`
@@ -226,7 +228,13 @@ app.addEventListener('click', async (e) => {
   const tile = e.target.closest('.ic-tile[data-name]')
   if (tile) {
     const icon = { name: tile.dataset.name, style: tile.dataset.style, path: tile.dataset.path, set_id: tile.dataset.set || st.setId }
-    if (qa) { e.stopPropagation(); if (qa.dataset.qa === 'detail') openDetail(icon); else copyIcon(icon); return }
+    if (qa) {
+      e.stopPropagation()
+      if (qa.dataset.qa === 'detail') openDetail(icon)
+      else if (qa.dataset.qa === 'add') wDrop({ set_id: icon.set_id, name: icon.name, style: icon.style || '' })
+      else copyIcon(icon)
+      return
+    }
     copyIcon(icon)
   }
 })
@@ -269,11 +277,17 @@ $('#detail').addEventListener('hidden.bs.offcanvas', () => { st.detail = null })
 
 $$('[name="ic-bg"]').forEach((r) => r.addEventListener('change', () => { st.bg = r.value; applyAppearance() }))
 $$('[name="ic-dens"]').forEach((r) => r.addEventListener('change', () => { app.dataset.dens = r.value }))
-$$('[name="ic-mode"]').forEach((r) => r.addEventListener('change', () => {
-  app.dataset.mode = r.value
-  $('#wpane').classList.toggle('d-none', r.value !== 'workshop')
-  if (r.value === 'workshop') loadWsets()
-}))
+$$('[name="ic-mode"]').forEach((r) => r.addEventListener('change', () => setMode(r.value)))
+function setMode(mode) {
+  st.workshop = mode === 'workshop'
+  app.dataset.mode = mode
+  // Auf schmalen Schirmen ist die Werkstatt ein Offcanvas mit eigenem Schalter.
+  $('#wpane').classList.toggle('d-none', !st.workshop)
+  $('#wopen').classList.toggle('d-none', !st.workshop)
+  if (!st.workshop) bootstrap.Offcanvas.getOrCreateInstance('#wpane').hide()
+  if (st.workshop) loadWsets()
+  if ($('#grid').children.length) search(false) // Kacheln neu zeichnen (Aufnehmen-Knopf)
+}
 
 // Endloses Nachladen
 new IntersectionObserver((ents) => { if (ents[0].isIntersecting) loadMore() }, { root: $('#results'), rootMargin: '500px' }).observe($('#sentinel'))
@@ -423,6 +437,7 @@ initComponents()
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (!localStorage.getItem('iconify-theme')) applyTheme() })
 applyTheme(); setSize(48); setSearchMode('word')
 app.dataset.dens = 'comf'
-$('#wpane').classList.add('d-none')
-api.health().then((h) => { $('#ver').textContent = 'v' + h.version }).catch(() => {})
+setMode('browse')
+api.health().then((h) => { $('#ver').textContent = 'Iconify ' + (h.voll || 'v' + h.version) })
+  .catch(() => { $('#ver').textContent = 'Backend nicht erreichbar' })
 loadSets().then(() => search(false)).catch(() => toast('Backend nicht erreichbar'))

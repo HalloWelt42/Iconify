@@ -572,6 +572,14 @@ body {
   color: var(--bs-primary-text-emphasis);
 }
 
+// Fusszeile: zeigt die laufende Version (Quelle version.json ueber /health).
+.ic-foot {
+  flex: 0 0 auto;
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+  letter-spacing: 0.03em;
+}
+
 // Kleine Schirme -------------------------------------------------------------
 @include media-breakpoint-down(lg) {
   .ic-body {
@@ -582,8 +590,9 @@ body {
     width: 280px;
   }
 
-  .ic-workshop {
-    width: 100%;
+  // Unterhalb von lg liegt die Werkstatt als Offcanvas ueber dem Raster.
+  .ic-workshop.offcanvas-lg {
+    width: min(360px, 92vw);
   }
 }
 
