@@ -37,19 +37,33 @@
     </div>
   </header>
 
-  <!-- Suche -->
+  <!-- Suche: eine Eingabe, umschaltbar zwischen Stichwort und KI -->
   <div class="d-flex justify-content-center px-3 px-md-4 pb-2">
-    <div class="input-group input-group-lg ic-search shadow-sm">
-      <span class="input-group-text bg-body text-secondary">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      </span>
-      <input id="q" class="form-control border-start-0 border-end-0" placeholder="Icons durchsuchen…" autocomplete="off" aria-label="Icons durchsuchen">
-      <select class="form-select flex-grow-0 w-auto d-none d-sm-block" id="scope" aria-label="Suchbereich">
-        <option value="all">Alle Sets</option>
-        <option value="set">Aktuelles Set</option>
-        <option value="custom">Eigene Sets</option>
-      </select>
-      <button class="btn ic-ai" data-act="ai" type="button" title="KI-Prosa-Suche">&#10024;<span class="d-none d-sm-inline"> KI</span></button>
+    <div class="ic-search">
+      <div class="input-group input-group-lg shadow-sm">
+        <span class="input-group-text bg-body text-secondary">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </span>
+        <input id="q" class="form-control border-start-0" placeholder="Icons durchsuchen…" autocomplete="off" aria-label="Suchbegriff">
+        <select class="form-select flex-grow-0 w-auto d-none d-sm-block" id="scope" aria-label="Suchbereich">
+          <option value="all">Alle Sets</option>
+          <option value="set">Aktuelles Set</option>
+          <option value="custom">Eigene Sets</option>
+        </select>
+        <button class="btn btn-primary" id="go" data-act="go" type="button">
+          <span class="spinner-border spinner-border-sm d-none" id="go-spin" role="status" aria-hidden="true"></span>
+          <span id="go-label">Suchen</span>
+        </button>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Suchart">
+          <input type="radio" class="btn-check" name="ic-searchmode" id="sm-word" value="word" checked>
+          <label class="btn btn-outline-primary" for="sm-word">Stichwort</label>
+          <input type="radio" class="btn-check" name="ic-searchmode" id="sm-ai" value="ai">
+          <label class="btn btn-outline-primary" for="sm-ai">&#10024; KI</label>
+        </div>
+        <span class="small text-secondary" id="searchhint">Sucht sofort im Namen der Icons.</span>
+      </div>
     </div>
   </div>
 
@@ -70,7 +84,7 @@
 
     <div class="d-flex align-items-center gap-2">
       <label class="ic-label" for="size">Größe</label>
-      <input type="range" class="form-range" min="20" max="80" value="40" id="size">
+      <input type="range" class="form-range" min="20" max="96" value="48" id="size">
     </div>
 
     <div class="d-flex align-items-center gap-2">

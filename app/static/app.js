@@ -34,7 +34,7 @@ const HUES = [['#FFCDD2','#E57373','#F44336','#D32F2F','#B71C1C'],['#F8BBD0','#F
 const SW = ['#000000', '#FFFFFF', ...HUES.flat()]
 
 // ---- Zustand ----
-const st = { sets: [], setId: null, scope: 'all', license: '', q: '', style: '', page: 1, pages: 1, loading: false,
+const st = { sets: [], setId: null, scope: 'all', mode: 'word', license: '', q: '', style: '', page: 1, pages: 1, loading: false,
   bg: 'auto', color: 'auto', codeData: null, codeTab: 'svg', detail: null, wset: null, wicons: [] }
 
 // ---- Bausteine von Bootstrap ----
@@ -200,7 +200,7 @@ app.addEventListener('click', async (e) => {
   if (act === 'exp-font') return exportAction('font')
   if (act === 'exp-zip') return exportAction('zip')
   if (act === 'exp-sprite') return exportAction('sprite')
-  if (act === 'ai') return aiSearch()
+  if (act === 'go') return runSearch()
   if (act === 'settings') return openSettings()
   if (act === 'llm-test') return llmTest()
   if (act === 'llm-save') return llmSave(false)
@@ -232,8 +232,31 @@ app.addEventListener('click', async (e) => {
 })
 
 let qt
-$('#q').addEventListener('input', (e) => { st.q = e.target.value; clearTimeout(qt); qt = setTimeout(() => search(false), 220) })
-$('#q').addEventListener('keydown', (e) => { if (e.key === 'Enter') aiSearch() })
+// Die Suchart entscheidet, was Eingabe und Eingabetaste ausloesen.
+function runSearch() { return st.mode === 'ai' ? aiSearch() : search(false) }
+function setSearchMode(mode) {
+  st.mode = mode
+  const ai = mode === 'ai'
+  $('#q').placeholder = ai ? 'Beschreiben, was gesucht wird…' : 'Icons durchsuchen…'
+  $('#searchhint').textContent = ai
+    ? 'Beschreibung eingeben und "Suchen" drücken - das Sprachmodell übersetzt sie in Stichworte.'
+    : 'Sucht sofort im Namen der Icons.'
+  $('#go').classList.toggle('ic-ai', ai)
+  $('#go').classList.toggle('btn-primary', !ai)
+  if (!ai && st.q.trim()) search(false)
+}
+function setBusy(on) {
+  $('#go').disabled = on
+  $('#go-spin').classList.toggle('d-none', !on)
+  $('#go-label').textContent = on ? 'Sucht…' : 'Suchen'
+}
+$('#q').addEventListener('input', (e) => {
+  st.q = e.target.value
+  if (st.mode !== 'word') return
+  clearTimeout(qt); qt = setTimeout(() => search(false), 220)
+})
+$('#q').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); runSearch() } })
+$$('[name="ic-searchmode"]').forEach((r) => r.addEventListener('change', () => setSearchMode(r.value)))
 $('#scope').addEventListener('change', (e) => {
   st.scope = e.target.value
   if (st.scope === 'set' && !st.setId) { const f = st.sets.find((s) => s.downloaded); if (f) st.setId = f.id }
@@ -245,11 +268,7 @@ $('#dsize').addEventListener('input', (e) => { $('#dsizev').textContent = e.targ
 $('#detail').addEventListener('hidden.bs.offcanvas', () => { st.detail = null })
 
 $$('[name="ic-bg"]').forEach((r) => r.addEventListener('change', () => { st.bg = r.value; applyAppearance() }))
-$$('[name="ic-dens"]').forEach((r) => r.addEventListener('change', () => {
-  const c = r.value === 'comp'
-  $('#grid').style.setProperty('--tile-min', c ? '86px' : '116px')
-  $('#grid').style.setProperty('--tile-gap', c ? '.625rem' : '1rem')
-}))
+$$('[name="ic-dens"]').forEach((r) => r.addEventListener('change', () => { app.dataset.dens = r.value }))
 $$('[name="ic-mode"]').forEach((r) => r.addEventListener('change', () => {
   app.dataset.mode = r.value
   $('#wpane').classList.toggle('d-none', r.value !== 'workshop')
@@ -357,8 +376,8 @@ app.addEventListener('dragstart', (e) => {
 
 // ---- KI-Suche und Einstellungen ----
 async function aiSearch() {
-  if (!st.q.trim()) { toast('Erst einen Suchbegriff eingeben'); return }
-  toast('KI denkt…')
+  if (!st.q.trim()) { toast('Erst eine Beschreibung eingeben'); return }
+  setBusy(true)
   try {
     const d = await (await fetch('/api/icons/ai-search?q=' + encodeURIComponent(st.q) + '&license=' + st.license)).json()
     if (!d.connected) { toast('KI nicht verbunden - siehe Einstellungen'); return }
@@ -367,7 +386,7 @@ async function aiSearch() {
     $('#grid').innerHTML = d.icons.map(tileHtml).join(''); applyAppearance()
     $('#cnt').textContent = d.total; $('#empty').hidden = true
     toast('KI-Treffer: ' + d.terms.join(', '))
-  } catch { toast('KI-Suche fehlgeschlagen') }
+  } catch { toast('KI-Suche fehlgeschlagen') } finally { setBusy(false) }
 }
 function showLlmStatus(s) {
   const el = $('#llm-status')
@@ -402,7 +421,8 @@ async function llmTest() {
 // ---- Start ----
 initComponents()
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (!localStorage.getItem('iconify-theme')) applyTheme() })
-applyTheme(); setSize(40)
+applyTheme(); setSize(48); setSearchMode('word')
+app.dataset.dens = 'comf'
 $('#wpane').classList.add('d-none')
 api.health().then((h) => { $('#ver').textContent = 'v' + h.version }).catch(() => {})
 loadSets().then(() => search(false)).catch(() => toast('Backend nicht erreichbar'))
