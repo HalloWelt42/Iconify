@@ -608,6 +608,77 @@ body {
   letter-spacing: 0.03em;
 }
 
+// Unterstuetzen: Herz in der Fusszeile, Overlay mit Ko-fi und den QR-Codes.
+.ic-herz {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: inherit;
+}
+
+.ic-herz:hover,
+.ic-herz:focus-visible {
+  color: #e0245e;
+}
+
+.ic-kofi {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ic-coin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ic-coin-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+// Der QR-Code braucht dunkle Module auf hellem Grund - unabhaengig vom Erscheinungsbild.
+.ic-qr-box {
+  width: 100%;
+  max-width: 150px;
+  padding: 0.5rem;
+  border-radius: var(--bs-border-radius);
+  background: #ffffff;
+  color: #12100f;
+  line-height: 0;
+}
+
+.ic-qr {
+  width: 100%;
+  height: auto;
+  shape-rendering: crispEdges;
+}
+
+.ic-adresse {
+  width: 100%;
+  padding: 0.25rem 0.375rem;
+  border: 0;
+  border-radius: var(--bs-border-radius-sm);
+  background: var(--bs-secondary-bg);
+  color: var(--bs-secondary-color);
+  font-family: var(--bs-font-monospace);
+  font-size: 0.5625rem;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.ic-adresse:hover,
+.ic-adresse:focus-visible {
+  color: var(--bs-body-color);
+  background: var(--bs-tertiary-bg);
+}
+
 // Kleine Schirme -------------------------------------------------------------
 @include media-breakpoint-down(lg) {
   .ic-body {

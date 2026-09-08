@@ -4,7 +4,7 @@ Mit Custom Font Generator und eigenen Icon-Sets
 """
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from pathlib import Path
 import logging
 
@@ -33,9 +33,15 @@ TEMP_PATH = Path("/app/temp")
 TEMP_PATH.mkdir(parents=True, exist_ok=True)
 
 
+INDEX_DATEI = Path("app/static/index.html")
+
+
 @app.get("/")
 async def root():
-    return FileResponse("app/static/index.html")
+    """Liefert die Oberflaeche und haengt die laufende Version an die Verweise,
+    damit Browser nach einem Neubau nicht auf alten Dateien sitzen bleiben."""
+    seite = INDEX_DATEI.read_text(encoding="utf-8").replace("__V__", __version_full__)
+    return HTMLResponse(seite, headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/favicon.ico")

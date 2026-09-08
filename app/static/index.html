@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Iconify</title>
-<link rel="stylesheet" href="/static/vendor/fonts/barlow.css?v=3.1.0">
-<link rel="stylesheet" href="/static/vendor/iconify.css?v=3.1.0">
+<link rel="stylesheet" href="/static/vendor/fonts/barlow.css?v=__V__">
+<link rel="stylesheet" href="/static/vendor/iconify.css?v=__V__">
 </head>
 <body>
 <div class="ic-app" id="app" data-mode="browse">
@@ -265,9 +265,59 @@
     </div>
   </div>
 
-  <footer class="ic-foot px-3 px-md-4 pb-2">
+  <footer class="ic-foot px-3 px-md-4 pb-2 d-flex align-items-center gap-2">
     <span id="ver">…</span>
+    <button type="button" class="ic-herz" data-act="spende" title="Projekt unterstützen" aria-label="Projekt unterstützen">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.5-9A5.2 5.2 0 0 1 12 6.2 5.2 5.2 0 0 1 21.5 12c-2 4.3-9.5 9-9.5 9z"/></svg>
+      Unterstützen
+    </button>
   </footer>
+
+  <!-- Unterstützen -->
+  <div class="modal fade" id="spende" tabindex="-1" aria-labelledby="spende-titel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="spende-titel">Unterstützen</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="mb-4">Iconify ist ein privates Hobby-Projekt.<br>Kein Tracking, keine Werbung, keine Kompromisse.</p>
+
+          <a class="btn btn-primary btn-lg ic-kofi" href="https://ko-fi.com/HalloWelt42" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4zM6 2v2M10 2v2M14 2v2"/></svg>
+            Einen Kaffee spendieren
+          </a>
+
+          <p class="ic-label mt-4 mb-3">Oder per Kryptowährung</p>
+          <div class="row row-cols-1 row-cols-sm-3 g-3">
+        <div class="col">
+          <div class="ic-coin h-100">
+            <div class="ic-coin-name">Bitcoin <span class="text-secondary">BTC</span></div>
+            <div class="ic-qr-box"><svg class="ic-qr" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33"><path stroke="currentColor" d="M2 2.5h7m1 0h1m4 0h1m2 0h2m4 0h7m-29 1h1m5 0h1m1 0h1m1 0h1m3 0h1m1 0h1m2 0h1m2 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m1 0h2m2 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h3m3 0h1m1 0h5m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m4 0h1m4 0h1m5 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-20 1h1m1 0h1m1 0h1m1 0h2m1 0h1m1 0h1m-21 1h1m2 0h6m2 0h2m1 0h1m1 0h2m3 0h1m2 0h1m1 0h3m-29 1h1m2 0h1m4 0h1m3 0h1m1 0h2m1 0h1m1 0h1m3 0h2m1 0h2m-24 1h1m1 0h2m2 0h2m1 0h3m1 0h2m2 0h6m-26 1h3m1 0h1m1 0h4m1 0h1m1 0h2m1 0h2m1 0h2m2 0h2m1 0h2m-29 1h1m4 0h3m2 0h3m3 0h1m3 0h1m1 0h2m1 0h1m1 0h2m-29 1h1m2 0h1m1 0h1m1 0h2m1 0h1m2 0h1m1 0h3m3 0h4m2 0h2m-28 1h2m3 0h1m3 0h1m3 0h2m1 0h3m2 0h1m1 0h5m-28 1h4m3 0h1m1 0h3m3 0h1m1 0h1m1 0h1m4 0h3m-28 1h2m1 0h1m1 0h2m2 0h2m1 0h2m1 0h1m5 0h1m1 0h1m3 0h1m-28 1h2m2 0h1m3 0h1m2 0h1m2 0h2m1 0h5m2 0h2m-26 1h2m1 0h4m1 0h3m2 0h4m2 0h4m2 0h2m1 0h1m-29 1h2m3 0h1m4 0h2m1 0h1m1 0h1m2 0h1m2 0h2m2 0h2m1 0h1m-29 1h2m2 0h1m1 0h1m2 0h2m1 0h1m1 0h1m2 0h2m1 0h5m1 0h3m-21 1h4m3 0h1m4 0h1m3 0h3m-27 1h7m1 0h1m1 0h1m1 0h4m3 0h2m1 0h1m1 0h3m-27 1h1m5 0h1m1 0h4m3 0h1m1 0h4m3 0h1m-25 1h1m1 0h3m1 0h1m1 0h9m2 0h6m2 0h1m-28 1h1m1 0h3m1 0h1m1 0h2m1 0h8m2 0h1m3 0h1m2 0h1m-29 1h1m1 0h3m1 0h1m2 0h8m1 0h2m3 0h2m2 0h2m-29 1h1m5 0h1m2 0h1m2 0h3m3 0h2m1 0h4m1 0h1m1 0h1m-29 1h7m1 0h1m2 0h1m3 0h2m1 0h1m1 0h4m1 0h1"/></svg></div>
+            <button type="button" class="ic-adresse" data-kopieren="bc1qnd599khdkv3v3npmj9ufxzf6h4fzanny2acwqr" title="Adresse kopieren">bc1qnd599khdkv3v3npmj9ufxzf6h4fzanny2acwqr</button>
+          </div>
+        </div>
+        <div class="col">
+          <div class="ic-coin h-100">
+            <div class="ic-coin-name">Dogecoin <span class="text-secondary">DOGE</span></div>
+            <div class="ic-qr-box"><svg class="ic-qr" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33"><path stroke="currentColor" d="M2 2.5h7m1 0h1m1 0h2m1 0h3m1 0h1m1 0h1m2 0h7m-29 1h1m5 0h1m1 0h2m3 0h3m2 0h2m2 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h7m4 0h2m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h2m1 0h4m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h4m1 0h1m1 0h1m3 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m2 0h1m3 0h2m1 0h3m3 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-19 1h1m1 0h1m1 0h1m3 0h3m-21 1h1m2 0h7m3 0h5m2 0h2m2 0h1m1 0h3m-28 1h2m2 0h1m3 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h7m-25 1h1m1 0h2m1 0h3m1 0h1m1 0h2m1 0h2m1 0h2m1 0h2m1 0h1m-27 1h2m2 0h2m1 0h1m1 0h3m2 0h2m1 0h1m2 0h4m1 0h1m1 0h1m-28 1h1m1 0h1m1 0h5m1 0h2m1 0h3m1 0h1m1 0h2m1 0h1m5 0h1m-29 1h4m1 0h1m2 0h1m1 0h3m3 0h1m5 0h3m1 0h3m-27 1h1m1 0h1m1 0h7m1 0h3m2 0h1m1 0h1m1 0h1m3 0h2m-29 1h2m1 0h1m1 0h1m2 0h2m1 0h1m1 0h4m3 0h1m3 0h3m1 0h1m-29 1h1m4 0h2m2 0h1m1 0h2m3 0h2m1 0h2m7 0h1m-29 1h3m1 0h1m3 0h5m4 0h4m1 0h3m1 0h1m1 0h1m-29 1h4m2 0h1m5 0h4m3 0h1m4 0h1m1 0h1m1 0h1m-29 1h2m3 0h1m1 0h4m1 0h2m6 0h2m1 0h1m2 0h1m-27 1h2m1 0h1m2 0h2m1 0h1m1 0h1m1 0h1m1 0h1m3 0h6m3 0h1m-21 1h4m1 0h1m1 0h4m1 0h1m3 0h1m3 0h1m-29 1h7m1 0h3m2 0h1m1 0h1m1 0h1m2 0h1m1 0h1m1 0h3m-27 1h1m5 0h1m1 0h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m3 0h2m-26 1h1m1 0h3m1 0h1m1 0h2m3 0h1m2 0h2m1 0h10m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h5m1 0h4m3 0h2m1 0h1m-29 1h1m1 0h3m1 0h1m8 0h1m2 0h7m1 0h3m-29 1h1m5 0h1m2 0h1m5 0h2m2 0h8m1 0h1m-29 1h7m1 0h5m1 0h2m1 0h1m1 0h3m1 0h3"/></svg></div>
+            <button type="button" class="ic-adresse" data-kopieren="DL7tuiYCqm3xQjMDXChdxeQxqUGMACn1ZV" title="Adresse kopieren">DL7tuiYCqm3xQjMDXChdxeQxqUGMACn1ZV</button>
+          </div>
+        </div>
+        <div class="col">
+          <div class="ic-coin h-100">
+            <div class="ic-coin-name">Ethereum <span class="text-secondary">ETH</span></div>
+            <div class="ic-qr-box"><svg class="ic-qr" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33"><path stroke="currentColor" d="M2 2.5h7m2 0h1m2 0h1m2 0h2m2 0h1m2 0h7m-29 1h1m5 0h1m3 0h1m4 0h2m5 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m2 0h1m2 0h1m7 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h1m3 0h3m1 0h2m2 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m1 0h1m2 0h2m2 0h3m4 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h2m1 0h1m2 0h2m2 0h3m-21 1h1m1 0h5m2 0h2m2 0h1m1 0h3m2 0h1m1 0h5m-26 1h2m4 0h1m1 0h1m1 0h2m1 0h1m3 0h2m1 0h1m1 0h2m2 0h1m-28 1h1m2 0h7m4 0h3m1 0h1m6 0h1m-24 1h2m4 0h2m1 0h2m2 0h2m2 0h6m2 0h1m-28 1h1m3 0h3m2 0h1m1 0h2m1 0h2m1 0h2m5 0h5m-28 1h2m2 0h1m5 0h2m3 0h1m2 0h3m1 0h2m3 0h1m-29 1h1m1 0h1m1 0h4m1 0h3m1 0h3m2 0h1m7 0h2m-28 1h1m2 0h1m7 0h1m6 0h1m2 0h2m1 0h1m2 0h1m-24 1h3m2 0h2m2 0h1m1 0h1m1 0h4m4 0h4m-29 1h1m2 0h3m1 0h4m1 0h1m1 0h4m1 0h1m1 0h1m1 0h2m1 0h1m1 0h1m-29 1h1m2 0h1m1 0h3m5 0h1m1 0h1m2 0h1m1 0h2m1 0h1m-24 1h1m2 0h3m1 0h3m1 0h2m2 0h2m1 0h2m3 0h3m1 0h1m-28 1h1m1 0h5m1 0h4m1 0h1m1 0h1m1 0h2m1 0h5m1 0h2m-20 1h2m1 0h1m2 0h1m1 0h1m3 0h1m3 0h2m2 0h1m-29 1h7m5 0h4m1 0h2m1 0h1m1 0h1m1 0h1m1 0h2m-28 1h1m5 0h1m1 0h1m3 0h1m1 0h1m4 0h2m3 0h2m1 0h2m-29 1h1m1 0h3m1 0h1m1 0h2m2 0h1m2 0h4m1 0h5m1 0h3m-29 1h1m1 0h3m1 0h1m1 0h4m1 0h1m5 0h3m1 0h1m3 0h2m-29 1h1m1 0h3m1 0h1m1 0h6m1 0h3m4 0h1m1 0h4m-28 1h1m5 0h1m2 0h2m4 0h2m1 0h4m2 0h1m2 0h1m-28 1h7m1 0h1m1 0h2m2 0h2m5 0h1m1 0h4"/></svg></div>
+            <button type="button" class="ic-adresse" data-kopieren="0x8A28fc47bFFFA03C8f685fa0836E2dBe1CA14F27" title="Adresse kopieren">0x8A28fc47bFFFA03C8f685fa0836E2dBe1CA14F27</button>
+          </div>
+        </div>
+          </div>
+          <p class="small text-secondary mt-3 mb-0">Ein Tippen auf die Adresse kopiert sie.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
     <div class="toast align-items-center text-bg-dark border-0" id="toast" role="status" aria-live="polite" aria-atomic="true">
@@ -279,7 +329,7 @@
   </div>
 </div>
 
-<script src="/static/vendor/bootstrap.bundle.min.js?v=3.1.0"></script>
-<script src="/static/app.js?v=3.1.0"></script>
+<script src="/static/vendor/bootstrap.bundle.min.js?v=__V__"></script>
+<script src="/static/app.js?v=__V__"></script>
 </body>
 </html>

@@ -45,6 +45,7 @@ function initComponents() {
   bs.cmdk = new bootstrap.Modal('#cmdk')
   bs.settings = new bootstrap.Modal('#settings')
   bs.newset = new bootstrap.Modal('#newset')
+  bs.spende = new bootstrap.Modal('#spende')
   bs.toast = new bootstrap.Toast('#toast', { delay: 2200 })
   bs.facets = bootstrap.Offcanvas.getOrCreateInstance('#facets')
 }
@@ -209,11 +210,14 @@ app.addEventListener('click', async (e) => {
   if (act === 'exp-sprite') return exportAction('sprite')
   if (act === 'go') return runSearch()
   if (act === 'settings') return openSettings()
+  if (act === 'spende') return bs.spende.show()
   if (act === 'llm-test') return llmTest()
   if (act === 'llm-save') return llmSave(false)
   if (act === 'copysvg') { if (st.codeData?.svg) { await copyText(st.codeData.svg); toast('SVG kopiert') } return }
   if (act === 'dl') { if (st.detail) { const a = document.createElement('a'); a.href = st.detail.path + '.svg'; a.download = st.detail.name + '.svg'; a.click() } return }
 
+  const kop = e.target.closest('[data-kopieren]')
+  if (kop) { await copyText(kop.dataset.kopieren); toast('Adresse kopiert'); return }
   const rm = e.target.closest('[data-rm]'); if (rm) { e.stopPropagation(); return removeWicon(rm.dataset.rm) }
   const gc = e.target.closest('[data-gcolor]')
   if (gc) { setColor(gc.dataset.gcolor); toast(gc.dataset.gcolor === 'auto' ? 'Farbe: automatisch' : 'Farbe: ' + gc.dataset.gcolor); return }

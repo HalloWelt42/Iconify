@@ -105,6 +105,26 @@ bash .githooks/install.sh          # Git-Hooks aktivieren
   über `/health`, sie steht unten links in der Oberfläche - nirgends fest geschrieben.
 - Branch: `dev`
 
+---
+
+## Unterstützen
+
+Iconify ist ein privates Hobby-Projekt. Kein Tracking, keine Werbung, keine Kompromisse.
+
+Wenn dir das Projekt gefällt, kannst du es weitersagen -- oder direkt hier:
+
+[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/HalloWelt42)
+
+**Crypto:**
+
+| Coin | Adresse |
+|------|---------|
+| BTC | `bc1qnd599khdkv3v3npmj9ufxzf6h4fzanny2acwqr` |
+| DOGE | `DL7tuiYCqm3xQjMDXChdxeQxqUGMACn1ZV` |
+| ETH | `0x8A28fc47bFFFA03C8f685fa0836E2dBe1CA14F27` |
+
+In der Oberfläche steht dasselbe hinter dem Herz unten links, dort mit QR-Codes.
+
 ## Lizenz
 
 [MIT](LICENSE) © HalloWelt42
