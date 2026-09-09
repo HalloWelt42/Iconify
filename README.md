@@ -105,6 +105,14 @@ bash .githooks/install.sh          # Git-Hooks aktivieren
   über `/health`, sie steht unten links in der Oberfläche - nirgends fest geschrieben.
 - Branch: `dev`
 
+**Ausführliche technische Dokumentation:** [docs/DOKUMENTATION.md](docs/DOKUMENTATION.md)
+- Aufbau in Schichten, Ablage auf der Platte und der Pfadvertrag
+- Import der Sammlungen (Strategie je Quelle, paralleles Laden, Wiederaufnahme)
+- Suchindex im Arbeitsspeicher und die Abfragen dahinter
+- KI-Suche Schritt für Schritt auf Codeebene
+- Erzeugung von SVG, Sprite und Icon-Schrift
+- Betriebsbuch und Glossar
+
 ---
 
 ## Unterstützen
